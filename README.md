@@ -1,2 +1,2 @@
 # Izola
-Repo for Home Appliance Projects
+# Repo for Home Appliance Projects
