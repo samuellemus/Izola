@@ -52,7 +52,6 @@ public class App {
     public static String userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
-        System.out.println("[options], [search], ...");
         String input = scanner.nextLine();
         System.out.println(input);
         scanner.close();
@@ -61,6 +60,9 @@ public class App {
 
     public static void main( String[] args ) {
         System.out.println( "Hello World!" );
-        userInterface();
+        System.out.println("[options] [search]");
+        String value = userInterface();
+        if (value.toLowerCase().equals("search")) System.out.println("You chose search.");
+        else if (value.toLowerCase().equals("options")) System.out.println("You chose options.");
     }
 }
