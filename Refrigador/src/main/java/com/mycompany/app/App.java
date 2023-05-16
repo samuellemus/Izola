@@ -22,9 +22,6 @@ public class App {
         .followRedirects(HttpClient.Redirect.NORMAL) // always redirects, except from HTTP
         .build(); // Build and returns a HttpClient object.
 
-    /**  Google {@code Gson} object for parsing JSON-formatted strings. */
-    Gson gson = new Gson();
-
     /**
      * fetchString Returns the response body string data from a URI.
      * @param uri location of desired content
@@ -51,7 +48,9 @@ public class App {
     public static void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
-        String jsonString;
+        /**  Google {@code Gson} object for parsing JSON-formatted strings. */
+        Gson gson = new Gson();
+        String json;
         System.out.println("[options] [search]");
         String value = scanner.nextLine();
         if (value.toLowerCase().equals("search")) {
@@ -65,7 +64,9 @@ public class App {
                                        mealString);
             try {
                 System.out.printf(url);
-                jsonString = App.fetchString(String.format(url));
+                json = App.fetchString(String.format(url));
+                App.MealDBResult result = gson.fromJson(json, MealDBResult.class);
+                System.out.println(result.meals[0].strMeal + "found");
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
@@ -75,6 +76,34 @@ public class App {
 
         scanner.close();
     }
+
+    public static class MealDBMeal {
+        String idMeal;
+        String strMeal;
+        String strCategory;
+        String strArea;
+        String strInstructions;
+        String strMealThumb;
+        String strTags;
+        String strYoutube;
+        String strIngredient1, strIngredient2, strIngredient3, strIngredient4;
+        String strIngredient5, strIngredient6, strIngredient7, strIngredient8;
+        String strIngredient9, strIngredient10, strIngredient11, strIngredient12;
+        String strIngredient13, strIngredient14, strIngredient15;
+        String strSource;
+        String strImageSource;
+        String strMeasure1, strMeasure2, strMeasure3, strMeasure4, strMeasure5;
+        String strMeasure6, strMeasure7, strMeasure8, strMeasure9, strMeasure10;
+        String strMeasure11, strMeasure12, strMeasure13, strMeasure14, strMeasure15;
+        String idIngredient;
+        String strIngredient;
+        String strDescription;
+    }
+
+    public static class MealDBResult {
+        MealDBMeal[] meals;
+    }
+
 
     public static void main( String[] args ) {
         System.out.println( "Hello World!" );
