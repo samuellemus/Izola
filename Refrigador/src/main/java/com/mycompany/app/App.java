@@ -1,6 +1,6 @@
 package com.mycompany.app;
 
-import com.google.gson.Gson;
+import com.google.code.Gson;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -21,7 +21,7 @@ public class App {
         .version(HttpClient.Version.HTTP_2) // Uses HTTP protocol version 2 where possible
         .followRedirects(HttpClient.Redirect.NORMAL) // always redirects, except from HTTP
         .build(); // Build and returns a HttpClient object.
-
+    public static Gson gson = new Gson();
     /**
      * fetchString Returns the response body string data from a URI.
      * @param uri location of desired content
@@ -49,7 +49,6 @@ public class App {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         /**  Google {@code Gson} object for parsing JSON-formatted strings. */
-        Gson gson = new Gson();
         String json;
         System.out.println("[options] [search]");
         String value = scanner.nextLine();
