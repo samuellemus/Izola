@@ -60,6 +60,8 @@ public class App {
             System.out.printf("Searching for %s", mealString);
             String url = String.format("%s/%s?=%s=%s",
                                        ENDPOINT_MEAL,
+                                       "search.php",
+                                       "s",
                                        mealString);
             try {
                 System.out.printf(url);
@@ -68,7 +70,9 @@ public class App {
                 System.out.println(e.toString());
             }
         }
-        else if (value.toLowerCase().equals("options")) System.out.println("You chose options.");
+        else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
+                                                                           + "\n this path is not coded yet");
+
         scanner.close();
     }
 
