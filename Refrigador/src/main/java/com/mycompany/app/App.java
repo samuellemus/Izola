@@ -48,33 +48,32 @@ public class App {
      * userInterface allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public static String userInterface() {
+    public static void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(input);
-        return input;
-    }
-
-    public static void main( String[] args ) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println( "Hello World!" );
+        String jsonString;
         System.out.println("[options] [search]");
         String value = scanner.nextLine();
         if (value.toLowerCase().equals("search")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
-            String meal_string = scanner.nextLine();
-            System.out.printf("Searching for %s", meal_string);
+            String mealString = scanner.nextLine();
+            System.out.printf("Searching for %s", mealString);
+            String url = String.format("%s/%s?=%s=%s",
+                                       ENDPOINT_MEAL,
+                                       mealString);
             try {
-                String jsonString = App.fetchString(String.format("%s/search.php?s=%s"
-                                                    , ENDPOINT_MEAL
-                                                    , meal_string));
-                System.out.println(jsonString);
+                System.out.printf(url);
+                jsonString = App.fetchString(String.format(url));
             } catch (Exception e) {
                 System.out.println(e.toString());
             }
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options.");
         scanner.close();
+    }
+
+    public static void main( String[] args ) {
+        System.out.println( "Hello World!" );
+        App.userInterface();
     }
 }
