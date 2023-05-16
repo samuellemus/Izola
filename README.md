@@ -1,4 +1,4 @@
-# Izola
+# Izola - Java
 # Repo for Home Appliance Projects
 Sections:
 - Refrigador
