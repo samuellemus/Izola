@@ -49,12 +49,14 @@ public class App {
      * userInterface allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public String userInterface() {
+    public static String userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
+        System.out.println("[options], [search], ...");
         String input = scanner.nextLine();
         System.out.println(input);
         scanner.close();
+        return input;
     }
 
     public static void main( String[] args ) {
