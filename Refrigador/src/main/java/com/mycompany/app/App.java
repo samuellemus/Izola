@@ -49,7 +49,7 @@ public class App {
      * userInterface allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public void userInterface() {
+    public String userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
@@ -59,5 +59,6 @@ public class App {
 
     public static void main( String[] args ) {
         System.out.println( "Hello World!" );
+        userInterface();
     }
 }
