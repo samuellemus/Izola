@@ -16,7 +16,6 @@ import java.util.Scanner;
 public class App {
     private static final String ENDPOINT_MEAL = "https://www.themealdb.com/api/json/v1/1";
     private static final String CONFIG_PATH = "resources/config.properties";
-
     /** HTTP client */
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2) // Uses HTTP protocol version 2 where possible
@@ -54,15 +53,28 @@ public class App {
         Scanner scanner = new Scanner(System.in);
         String input = scanner.nextLine();
         System.out.println(input);
-        scanner.close();
         return input;
     }
 
     public static void main( String[] args ) {
+        Scanner scanner = new Scanner(System.in);
         System.out.println( "Hello World!" );
         System.out.println("[options] [search]");
-        String value = userInterface();
-        if (value.toLowerCase().equals("search")) System.out.println("You chose search.");
+        String value = scanner.nextLine();
+        if (value.toLowerCase().equals("search")) {
+            System.out.println("You chose search.\n Which meal are you looking for?");
+            String meal_string = scanner.nextLine();
+            System.out.printf("Searching for %s", meal_string);
+            try {
+                String jsonString = App.fetchString(String.format("%s/search.php?s=%s"
+                                                    , ENDPOINT_MEAL
+                                                    , meal_string));
+                System.out.println(jsonString);
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options.");
+        scanner.close();
     }
 }
