@@ -3,6 +3,7 @@ package mycompany.app;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FileWriter;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse;
@@ -20,8 +21,6 @@ import com.google.gson.Gson;
 
 
 public class AppUtils extends App{
-
-
     ArrayList<String> rawIngredients = new ArrayList<>();
     ArrayList<String> ingredients = new ArrayList<>();
     ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
@@ -141,17 +140,24 @@ public class AppUtils extends App{
     private void addToArchive(String json, String mealName, String type) {
         System.out.println("Adding.");
         try {
-            File myObj = new File(String.format("resources/%ss/%s.txt", type, mealName));
+            String path = String.format("resources/%ss/%s.txt", type, mealName);
+            File myObj = new File(path);
+            FileWriter myWriter = new FileWriter(path);
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
+                myWriter.write(json);
+                myWriter.close();
             } else {
                 System.out.println("Meal already exists.");
+                myWriter.close();
             }
         } catch (IOException e) {
             System.out.println("An error occured");
             e.printStackTrace();
         }
     }
+
+
 
 
 
