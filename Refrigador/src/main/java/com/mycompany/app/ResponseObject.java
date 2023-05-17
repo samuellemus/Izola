@@ -1,6 +1,7 @@
 package mycompany.app;
 
 //import com.google.gson.annotations.SerialzedName;
+import java.util.Arrays;
 import java.util.List;
 
 public class ResponseObject extends App {
@@ -36,6 +37,8 @@ public class ResponseObject extends App {
     List<String> ingredientList;
 
     public ResponseObject() {
+        System.out.println("Currently not implemented");
+            //this.mealList = Arrays.asList(ResponseObject.MealDBResult.meals);
         //ingredientList.addAll(strIngredient1,
         //                      strIngredient2,
         //                      strIngredient3,

@@ -15,31 +15,6 @@ import java.util.Scanner;
  *
  */
 public class App {
-    private static final String ENDPOINT_MEAL = "https://www.themealdb.com/api/json/v1/1";
-    private static final String CONFIG_PATH = "resources/config.properties";
-    /** HTTP client */
-    public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
-        .version(HttpClient.Version.HTTP_2) // Uses HTTP protocol version 2 where possible
-        .followRedirects(HttpClient.Redirect.NORMAL) // always redirects, except from HTTP
-        .build(); // Build and returns a HttpClient object.
-
-    /**
-     * fetchString Returns the response body string data from a URI.
-     * @param uri location of desired content
-     * @return response body string
-     * @throws IOException if an I/O error occurs when sending or receiving
-     * @throws InterruptedException if the HTTP client's {@code send} method is interrupted.
-     **/
-    public static String fetchString(String url) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(url))
-            .build();
-        HttpResponse<String> response = HTTP_CLIENT.send(request, BodyHandlers.ofString());
-        final int statusCode = response.statusCode();
-        if (statusCode != 200) throw new IOException("response status code not 200: %d" + statusCode);
-        System.out.println("\n" + response.statusCode());
-        return response.body().trim();
-    }
 
     /**
      * trim allows the user to interact with the program to allow to custom modification
