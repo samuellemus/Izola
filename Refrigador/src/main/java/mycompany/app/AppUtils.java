@@ -78,18 +78,23 @@ public class AppUtils extends App{
             System.out.printf("Searching for %s\n", mealString);
             AppUtils
                 .searchMealDB(mealString, "search")
-                .ifPresent(result -> processMealDB(result));
+                .ifPresent(result -> processMealDBResult(result));
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
     }
 
-    private static void processMealDB(ResponseObject.MealDBResult result) {
+    ArrayList<ResponseObject.MealDBMeal> meals;
+
+    private static void processMealDBResult(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
+            this.meals.addAll(Arrays.asList(result.meals));
             for (ResponseObject.MealDBMeal meal : result.meals) {
-                System.out.println(meal.strMeal);
+
             }
+            return;
         }
+        System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
     }
 
     public AppUtils() {
