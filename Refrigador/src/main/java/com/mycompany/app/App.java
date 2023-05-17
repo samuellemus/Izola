@@ -1,12 +1,13 @@
-package com.mycompany.app;
+package mycompany.app;
 
-import com.google.code.Gson;
+import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.URI;
+import java.util.Optional;
 import java.util.Scanner;
 
 /**
@@ -21,7 +22,7 @@ public class App {
         .version(HttpClient.Version.HTTP_2) // Uses HTTP protocol version 2 where possible
         .followRedirects(HttpClient.Redirect.NORMAL) // always redirects, except from HTTP
         .build(); // Build and returns a HttpClient object.
-    public static Gson gson = new Gson();
+
     /**
      * fetchString Returns the response body string data from a URI.
      * @param uri location of desired content
@@ -32,7 +33,6 @@ public class App {
     public static String fetchString(String url) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(url))
-            .GET()
             .build();
         HttpResponse<String> response = HTTP_CLIENT.send(request, BodyHandlers.ofString());
         final int statusCode = response.statusCode();
@@ -45,7 +45,7 @@ public class App {
      * userInterface allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public static void userInterface() {
+    public static String userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         /**  Google {@code Gson} object for parsing JSON-formatted strings. */
@@ -55,7 +55,7 @@ public class App {
         if (value.toLowerCase().equals("search")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
-            System.out.printf("Searching for %s", mealString);
+            System.out.printf("Searching for %s\n", mealString);
             String url = String.format("%s/%s?=%s=%s",
                                        ENDPOINT_MEAL,
                                        "search.php",
@@ -63,17 +63,26 @@ public class App {
                                        mealString);
             try {
                 System.out.printf(url);
-                json = App.fetchString(String.format(url));
-                App.MealDBResult result = gson.fromJson(json, MealDBResult.class);
-                System.out.println(result.meals[0].strMeal + "found");
+                //json = fetchString(url);
+                scanner.close();
+                return fetchString(url);
             } catch (Exception e) {
+                scanner.close();
                 System.out.println(e.toString());
+                return null;
             }
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
+        return null;
+    }
 
-        scanner.close();
+    public Optional.<App.MealDBResult> gsonParser(String json) {
+        Gson gson = new Gson();
+        try {
+
+        }
+        App.MealDBResult = gson.fromJson(json, App.MealDBResult.class);
     }
 
     public static class MealDBMeal {
@@ -106,6 +115,6 @@ public class App {
 
     public static void main( String[] args ) {
         System.out.println( "Hello World!" );
-        App.userInterface();
+        System.out.println(App.userInterface());
     }
 }
