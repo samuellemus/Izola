@@ -43,14 +43,11 @@ public class AppUtils extends App{
 
 
     public static Optional<ResponseObject.MealDBResult> searchMealDB(String q, String option_type) {
-        System.out.printf("Searching for %s\n", q);
-        System.out.println("This should take no time at all...");
         try {
             String url = String.format("%s/%s.php?%s=%s", ENDPOINT_MEAL,
                                        option_type,"s",
                                        URLEncoder.encode(q, StandardCharsets.UTF_8));
             String json = AppUtils.fetchString(url);
-            //System.out.println(json);
             ResponseObject.MealDBResult result_meal =
                 gson.fromJson(
                               json,
@@ -89,7 +86,9 @@ public class AppUtils extends App{
 
     private static void processMealDB(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
-            System.out.println("Huzzah!");
+            for (ResponseObject.MealDBMeal meal : result.meals) {
+                System.out.println(meal.strMeal);
+            }
         }
     }
 
