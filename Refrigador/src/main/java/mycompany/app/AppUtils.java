@@ -2,6 +2,7 @@ package mycompany.app;
 
 
 import java.io.IOException;
+import java.io.File;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse;
@@ -12,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.Scanner;
 //import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.google.gson.Gson;
+import com.google.gson.Gson;
 
 
 public class AppUtils extends App{
@@ -21,6 +22,7 @@ public class AppUtils extends App{
     private String searchType;
     String searchItem;
     String json;
+    private static final Gson gson = new Gson();
 
     public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
@@ -40,23 +42,25 @@ public class AppUtils extends App{
     } // fetchString
 
 
-    public String searchMealDB(String q) {
+    public static Optional<ResponseObject.MealDBResult> searchMealDB(String q, String option_type) {
         System.out.printf("Searching for %s\n", q);
         System.out.println("This should take no time at all...");
         try {
-            String url = String.format("%s/%s?%s=%s",
-                                       AppUtils.ENDPOINT_MEAL,
-                                       "search.php",
-                                       "s",
+            String url = String.format("%s/%s.php?%s=%s", ENDPOINT_MEAL,
+                                       option_type,"s",
                                        URLEncoder.encode(q, StandardCharsets.UTF_8));
-            this.json = AppUtils.fetchString(url);
-            System.out.println(json);
+            String json = AppUtils.fetchString(url);
+            //System.out.println(json);
+            ResponseObject.MealDBResult result_meal =
+                gson.fromJson(
+                              json,
+                              ResponseObject.MealDBResult.class);
             System.out.println("[ url ] " + url + "\n\n");
-            return json;
+            return Optional.<ResponseObject.MealDBResult>ofNullable(result_meal);
         } catch (IllegalArgumentException | IOException | InterruptedException e) {
             System.out.println("Something went wrong with the mealDB api. " +
                                "Please try again or try a different search.");
-            return null;
+            return Optional.<ResponseObject.MealDBResult>empty();
         }
     }
 
@@ -64,7 +68,7 @@ public class AppUtils extends App{
      * trim allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public static String userInterface() {
+    public static void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         /**  Google {@code Gson} object for parsing JSON-formatted strings. */
@@ -75,16 +79,22 @@ public class AppUtils extends App{
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
             System.out.printf("Searching for %s\n", mealString);
-            return mealString;
+            AppUtils
+                .searchMealDB(mealString, "search")
+                .ifPresent(result -> processMealDB(result));
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
-        return null;
+    }
+
+    private static void processMealDB(ResponseObject.MealDBResult result) {
+        if (result.meals != null) {
+            System.out.println("Huzzah!");
+        }
     }
 
     public AppUtils() {
         System.out.println("Called AppUtils");
-        this.searchItem = AppUtils.userInterface();
-        this.json = searchMealDB(this.searchItem);
+        this.userInterface();
     }
 }
