@@ -42,10 +42,10 @@ public class App {
     }
 
     /**
-     * userInterface allows the user to interact with the program to allow to custom modification
+     * trim allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public static String userInterface() {
+    public static void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         /**  Google {@code Gson} object for parsing JSON-formatted strings. */
@@ -62,59 +62,20 @@ public class App {
                                        "s",
                                        mealString);
             try {
-                System.out.printf(url);
+                System.out.println(url);
                 //json = fetchString(url);
                 scanner.close();
-                return fetchString(url);
             } catch (Exception e) {
                 scanner.close();
                 System.out.println(e.toString());
-                return null;
             }
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
-        return null;
-    }
-
-    public Optional.<App.MealDBResult> gsonParser(String json) {
-        Gson gson = new Gson();
-        try {
-
-        }
-        App.MealDBResult = gson.fromJson(json, App.MealDBResult.class);
-    }
-
-    public static class MealDBMeal {
-        String idMeal;
-        String strMeal;
-        String strCategory;
-        String strArea;
-        String strInstructions;
-        String strMealThumb;
-        String strTags;
-        String strYoutube;
-        String strIngredient1, strIngredient2, strIngredient3, strIngredient4;
-        String strIngredient5, strIngredient6, strIngredient7, strIngredient8;
-        String strIngredient9, strIngredient10, strIngredient11, strIngredient12;
-        String strIngredient13, strIngredient14, strIngredient15;
-        String strSource;
-        String strImageSource;
-        String strMeasure1, strMeasure2, strMeasure3, strMeasure4, strMeasure5;
-        String strMeasure6, strMeasure7, strMeasure8, strMeasure9, strMeasure10;
-        String strMeasure11, strMeasure12, strMeasure13, strMeasure14, strMeasure15;
-        String idIngredient;
-        String strIngredient;
-        String strDescription;
-    }
-
-    public static class MealDBResult {
-        MealDBMeal[] meals;
     }
 
 
     public static void main( String[] args ) {
         System.out.println( "Hello World!" );
-        System.out.println(App.userInterface());
     }
 }
