@@ -10,26 +10,34 @@ import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
-//import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 
 
 public class AppUtils extends App{
 
+
+    ArrayList<String> rawIngredients = new ArrayList<>();
+    ArrayList<String> ingredients = new ArrayList<>();
+    ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
+    ArrayList<ResponseObject.MealDBMeal> meals;
     static String ENDPOINT_MEAL = "https://www.themealdb.com/api/json/v1/1";
     private String searchType;
     String searchItem;
     String json;
     private static final Gson gson = new Gson();
 
-    public static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+    public HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
         .followRedirects(HttpClient.Redirect.NORMAL)
         .build();
 
-    public static String fetchString(String uri) throws IOException, InterruptedException {
+    public String fetchString(String uri) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
             .uri(URI.create(uri))
             .build();
@@ -41,13 +49,12 @@ public class AppUtils extends App{
         return response.body().trim();
     } // fetchString
 
-
-    public static Optional<ResponseObject.MealDBResult> searchMealDB(String q, String option_type) {
+    public Optional<ResponseObject.MealDBResult> searchMealDB(String q, String option_type) {
         try {
             String url = String.format("%s/%s.php?%s=%s", ENDPOINT_MEAL,
                                        option_type,"s",
                                        URLEncoder.encode(q, StandardCharsets.UTF_8));
-            String json = AppUtils.fetchString(url);
+            String json = fetchString(url);
             ResponseObject.MealDBResult result_meal =
                 gson.fromJson(
                               json,
@@ -65,7 +72,7 @@ public class AppUtils extends App{
      * trim allows the user to interact with the program to allow to custom modification
      * of inquiries formatted and show in the CLI
      **/
-    public static void userInterface() {
+    public void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
         /**  Google {@code Gson} object for parsing JSON-formatted strings. */
@@ -76,26 +83,79 @@ public class AppUtils extends App{
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
             System.out.printf("Searching for %s\n", mealString);
-            AppUtils
-                .searchMealDB(mealString, "search")
+            searchMealDB(mealString, "search")
                 .ifPresent(result -> processMealDBResult(result));
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
     }
 
-    ArrayList<ResponseObject.MealDBMeal> meals;
+    HashSet<String> knownIngredients = new HashSet<>();
 
-    private static void processMealDBResult(ResponseObject.MealDBResult result) {
+    private void processMealDBResult(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
-            this.meals.addAll(Arrays.asList(result.meals));
+            meals = new ArrayList<>();
             for (ResponseObject.MealDBMeal meal : result.meals) {
-
+                meals.add(meal);
             }
+            System.out.printf("There are %s meals available.\n", meals.size());
+            meals
+                .stream()
+                .forEach(meal -> {
+                        addToArchive(gson.toJson(meal), meal.strMeal.replace(" ", "_"), "meal");
+                        processMeal(meal);
+                            });
             return;
         }
         System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
     }
+
+    private void processMeal(ResponseObject.MealDBMeal meal) {
+        rawIngredients.add(meal.strIngredient1);
+        rawIngredients.add(meal.strIngredient2);
+        rawIngredients.add(meal.strIngredient3);
+        rawIngredients.add(meal.strIngredient4);
+        rawIngredients.add(meal.strIngredient5);
+        rawIngredients.add(meal.strIngredient6);
+        rawIngredients.add(meal.strIngredient7);
+        rawIngredients.add(meal.strIngredient8);
+        rawIngredients.add(meal.strIngredient9);
+        rawIngredients.add(meal.strIngredient10);
+        rawIngredients.add(meal.strIngredient11);
+        rawIngredients.add(meal.strIngredient12);
+        rawIngredients.add(meal.strIngredient13);
+        rawIngredients.add(meal.strIngredient14);
+        rawIngredients.stream().forEach(ing -> {
+                if (ing.length() > 1) {
+                    ingredients.add(ing);
+                    knownIngredients.add(ing);
+                }
+            });
+        System.out.println(meal.strMeal + " has " + ingredients.size() + " ingredients\n");
+        System.out.println("There is a possible " + knownIngredients.size() + " ingredients to choose from.");
+        knownIngredients.stream().forEach(elem -> System.out.println(elem));
+        this.rawIngredients.clear();
+        this.ingredients.clear();
+    }
+
+    private void addToArchive(String json, String mealName, String type) {
+        System.out.println("Adding.");
+        try {
+            File myObj = new File(String.format("resources/%ss/%s.txt", type, mealName));
+            if (myObj.createNewFile()) {
+                System.out.println("File created: " + myObj.getName());
+            } else {
+                System.out.println("Meal already exists.");
+            }
+        } catch (IOException e) {
+            System.out.println("An error occured");
+            e.printStackTrace();
+        }
+    }
+
+
+
+
 
     public AppUtils() {
         System.out.println("Called AppUtils");
