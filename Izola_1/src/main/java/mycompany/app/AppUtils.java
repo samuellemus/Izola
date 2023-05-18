@@ -72,8 +72,8 @@ public class AppUtils extends App{
     public void userInterface() {
         // Create a Scanner object
         Scanner scanner = new Scanner(System.in);
-        /**  Google {@code Gson} object for parsing JSON-formatted strings. */
         String json;
+        System.out.println("Welcome! How can I help you?");
         System.out.println("[options] [search]");
         String value = scanner.nextLine();
         if (value.toLowerCase().equals("search")) {
@@ -174,7 +174,6 @@ public class AppUtils extends App{
     }
 
     public AppUtils() {
-        System.out.println("Called AppUtils");
         this.userInterface();
     }
 }
