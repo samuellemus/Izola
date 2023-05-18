@@ -4,6 +4,7 @@ package mycompany.app;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.Reader;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.net.http.HttpResponse;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import java.util.Scanner;
 import com.google.gson.Gson;
 
-
 public class AppUtils extends App{
     ArrayList<String> rawIngredients = new ArrayList<>();
     ArrayList<String> ingredients = new ArrayList<>();
@@ -30,6 +30,9 @@ public class AppUtils extends App{
     String searchItem;
     String json;
     private static final Gson gson = new Gson();
+    String[] ingredientArray;
+    HashSet<String> knownIngredients = new HashSet<>();
+    List<CustomJsonObject.Meal> listOfMeals = new ArrayList<>();
 
     public HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
@@ -89,8 +92,6 @@ public class AppUtils extends App{
                                                                            + "\n this path is not coded yet");
     }
 
-    HashSet<String> knownIngredients = new HashSet<>();
-
     private void processMealDBResult(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
             meals = new ArrayList<>();
@@ -101,12 +102,15 @@ public class AppUtils extends App{
             meals
                 .stream()
                 .forEach(meal -> {
-                        addToArchive(gson.toJson(meal), meal.strMeal.replace(" ", "_"), "meal");
                         processMeal(meal);
                             });
-            return;
+            System.out.println("There is a possible "
+                           + knownIngredients.size()
+                           + " unique ingredients to choose from.");
+            convertAndSave();
+        } else {
+            System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
-        System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
     }
 
     private void processMeal(ResponseObject.MealDBMeal meal) {
@@ -125,43 +129,37 @@ public class AppUtils extends App{
         rawIngredients.add(meal.strIngredient13);
         rawIngredients.add(meal.strIngredient14);
         rawIngredients.stream().forEach(ing -> {
-                if (ing.length() > 1) {
+                if (ing != null && ing.length() > 0) {
                     ingredients.add(ing);
                     knownIngredients.add(ing);
                 }
             });
-        System.out.println(meal.strMeal + " has " + ingredients.size() + " ingredients\n");
-        System.out.println("There is a possible " + knownIngredients.size() + " ingredients to choose from.");
-        knownIngredients.stream().forEach(elem -> System.out.println(elem));
+        ingredientArray = new String[ingredients.size() - 1];
+        for (int i = 0; i < ingredients.size() - 1 ; i++) {
+            ingredientArray[i] = ingredients.get(i);
+        }
+        addToCollection(meal.strMeal, this.ingredientArray);
         this.rawIngredients.clear();
         this.ingredients.clear();
     }
 
-    private void addToArchive(String json, String mealName, String type) {
-        System.out.println("Adding.");
-        try {
-            String path = String.format("resources/%ss/%s.txt", type, mealName);
-            File myObj = new File(path);
-            FileWriter myWriter;
-            if (myObj.createNewFile()) {
-                System.out.println("File created: " + myObj.getName());
-                myWriter = new FileWriter(path);
-                myWriter.write(json);
-                myWriter.close();
-            } else {
-                System.out.println("Meal already exists.");
-                myWriter.close();
-            }
-        } catch (IOException e) {
-            System.out.println("An error occured");
-            e.printStackTrace();
-        }
+    private void addToCollection(String strMeal, String[] ingredients) {
+        CustomJsonObject.Meal customMeal =
+            new CustomJsonObject.Meal(strMeal, ingredients);
+        this.listOfMeals.add(customMeal);
     }
 
-
-
-
-
+    private void convertAndSave() {
+        for (CustomJsonObject.Meal mealItem : this.listOfMeals) {
+            System.out.println(mealItem.getMealName());
+        }
+        Gson gson = new Gson();
+        this.listOfMeals.stream().forEach(meal -> System.out.println(gson.toJson(meal)));
+        String mealJson = gson.toJson(this.listOfMeals);
+        String mealJsonParsed = mealJson.substring(1, mealJson.length() - 1);
+        mealJson = mealJson.replace("{", "{\n");
+        mealJson = mealJson.replace("}", "\n}");
+    }
 
 
     public AppUtils() {

@@ -4,7 +4,7 @@ package mycompany.app;
 import java.util.Arrays;
 import java.util.List;
 
-public class ResponseObject extends App {
+public class ResponseObject{
 
     public class MealDBResult {
         MealDBMeal[] meals;

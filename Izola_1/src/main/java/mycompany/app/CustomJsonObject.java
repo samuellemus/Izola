@@ -11,83 +11,60 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import com.google.gson.Gson;
 
-
-class Student {
-
-    private long studentId;
-    private String studentName;
-    private String[] studentClasses;
-
-    public Student (long studentId, String studentName) {
-        super();
-        this.studentId = studentId;
-        this.studentName = studentName;
-    }
-
-    public Student (long studentId, String studentName, String[] studentClasses) {
-        super();
-        this.studentId = studentId;
-        this.studentName = studentName;
-        this.studentClasses = studentClasses;
-    }
-
-    public long getStudentId() {
-        return studentId;
-    }
-
-    public void setStudentId(long studentId) {
-        this.studentId = studentId;
-    }
-
-    public String getStudentName() {
-        return studentName;
-    }
-
-    public void setStudentName(String studentName) {
-        this.studentName = studentName;
-    }
-
-    public String[] getStudentClasses() {
-        return studentClasses;
-    }
-
-    public void setStudentClasses(String[] studentClasses) {
-        this.studentClasses = studentClasses;
-    }
-}
-
-class MealObject {
-    private String mealName;
-    private String[] mealIngredients;
-
-}
-
 public class CustomJsonObject {
+
+    public static class MealCollection {
+        public CustomJsonObject.MealList[] meals;
+    }
+
+    public static class MealList {
+        public List<CustomJsonObject.Meal> mealList;
+    }
+
+    public static class Meal {
+        private String mealName;
+        private String[] mealIngredients;
+
+        public Meal(String mealName, String[] mealIngredients) {
+            super();
+            this.mealName = mealName;
+            this.mealIngredients = mealIngredients;
+        }
+
+        public String getMealName() {
+            return mealName;
+        }
+
+        public void setMealName(String mealName) {
+            this.mealName = mealName;
+        }
+
+        public String[] getMealIngredients() {
+            return mealIngredients;
+        }
+
+        public void setMealIngredients(String[] mealIngredients) {
+            this.mealIngredients = mealIngredients;
+        }
+    }
+
+
     public static void main (String [] args) throws FileNotFoundException, IOException {
 
-        List < Student >  students = new ArrayList <> ();
+        List < CustomJsonObject.Meal > meals = new ArrayList <> ();
 
-        Student student1 = new Student(100, "student1");
-        Student student2 = new Student(200, "student2");
-        Student student3 = new Student(300, "student3");
-        Student student4 = new Student(400, "student4");
-        Student student5 = new Student(500, "student5");
-        String[] classes = {"math", "physics", "chemistry", "history", "language"};
-        Student student6 = new Student(600, "student6", classes);
+        String[] spaghettiIngredients = {"pasta", "tomato sauce", "salt"};
+        CustomJsonObject.Meal meal1 = new CustomJsonObject.Meal("Spaghetti", spaghettiIngredients);
+        String[] gcIngredients = {"sliced bread", "colby-jack cheese", "cheddar", "butter"};
+        CustomJsonObject.Meal meal2 = new CustomJsonObject.Meal("Grilled Cheese", gcIngredients);
 
-        students.add(student1);
-        students.add(student2);
-        students.add(student3);
-        students.add(student4);
-        students.add(student5);
-        students.add(student6);
+        meals.add(meal1);
+        meals.add(meal2);
 
         Gson gson = new Gson();
-        String json = gson.toJson(students);
+        String json = gson.toJson(meals);
         json = json.replace("{", "{\n");
         json = json.replace("}", "\n}");
         System.out.println(json);
