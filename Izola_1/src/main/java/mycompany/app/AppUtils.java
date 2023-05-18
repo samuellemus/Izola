@@ -144,9 +144,6 @@ public class AppUtils extends App{
     private void convertAndSave() {
         Gson gson = new Gson();
         this.listOfMeals.stream().forEach(meal -> makeFile(meal.getMealName(), gson.toJson(meal)));
-        String mealJson = gson.toJson(this.listOfMeals);
-        String mealJsonParsed = mealJson.substring(1, mealJson.length() - 1);
-
     }
 
     private void makeFile(String mealName, String content) {
@@ -175,8 +172,6 @@ public class AppUtils extends App{
             e.printStackTrace();
         }
     }
-
-
 
     public AppUtils() {
         System.out.println("Called AppUtils");
