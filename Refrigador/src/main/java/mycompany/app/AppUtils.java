@@ -142,9 +142,10 @@ public class AppUtils extends App{
         try {
             String path = String.format("resources/%ss/%s.txt", type, mealName);
             File myObj = new File(path);
-            FileWriter myWriter = new FileWriter(path);
+            FileWriter myWriter;
             if (myObj.createNewFile()) {
                 System.out.println("File created: " + myObj.getName());
+                myWriter = new FileWriter(path);
                 myWriter.write(json);
                 myWriter.close();
             } else {
