@@ -4,6 +4,7 @@ package mycompany.app;
 import java.io.IOException;
 import java.io.File;
 import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse.BodyHandlers;
@@ -40,14 +41,10 @@ public class AppUtils extends App{
         .build();
 
     public String fetchString(String uri) throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder()
-            .uri(URI.create(uri))
-            .build();
+        HttpRequest request = HttpRequest.newBuilder().uri(URI.create(uri)).build();
         HttpResponse<String> response = HTTP_CLIENT.send(request, BodyHandlers.ofString());
         final int statusCode = response.statusCode();
-        if (statusCode != 200) {
-            throw new IOException("reponse status code not 200:" + statusCode);
-        } // if
+        if (statusCode != 200) throw new IOException("reponse status code not 200:" + statusCode);
         return response.body().trim();
     } // fetchString
 
@@ -58,9 +55,7 @@ public class AppUtils extends App{
                                        URLEncoder.encode(q, StandardCharsets.UTF_8));
             String json = fetchString(url);
             ResponseObject.MealDBResult result_meal =
-                gson.fromJson(
-                              json,
-                              ResponseObject.MealDBResult.class);
+                gson.fromJson(json, ResponseObject.MealDBResult.class);
             System.out.println("[ url ] " + url + "\n\n");
             return Optional.<ResponseObject.MealDBResult>ofNullable(result_meal);
         } catch (IllegalArgumentException | IOException | InterruptedException e) {
@@ -95,15 +90,9 @@ public class AppUtils extends App{
     private void processMealDBResult(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
             meals = new ArrayList<>();
-            for (ResponseObject.MealDBMeal meal : result.meals) {
-                meals.add(meal);
-            }
+            for (ResponseObject.MealDBMeal meal : result.meals) meals.add(meal);
             System.out.printf("There are %s meals available.\n", meals.size());
-            meals
-                .stream()
-                .forEach(meal -> {
-                        processMeal(meal);
-                            });
+            meals.stream().forEach(meal -> processMeal(meal));
             System.out.println("There is a possible "
                            + knownIngredients.size()
                            + " unique ingredients to choose from.");
@@ -134,32 +123,59 @@ public class AppUtils extends App{
                     knownIngredients.add(ing);
                 }
             });
-        ingredientArray = new String[ingredients.size() - 1];
-        for (int i = 0; i < ingredients.size() - 1 ; i++) {
-            ingredientArray[i] = ingredients.get(i);
-        }
-        addToCollection(meal.strMeal, this.ingredientArray);
+        ingredientArray = new String[ingredients.size()];
+        for (int i = 0; i < ingredients.size() ; i++) ingredientArray[i] = ingredients.get(i);
+        String mealString = meal.strMeal;
+        addToCollection(mealString, this.ingredientArray);
         this.rawIngredients.clear();
         this.ingredients.clear();
     }
 
     private void addToCollection(String strMeal, String[] ingredients) {
+        String mealName = strMeal.replace(" ", "_");
+        mealName = mealName.replace("&", "and");
+        mealName = mealName.replace("'", "");
+        System.out.println(mealName);
         CustomJsonObject.Meal customMeal =
-            new CustomJsonObject.Meal(strMeal, ingredients);
+            new CustomJsonObject.Meal(mealName, ingredients);
         this.listOfMeals.add(customMeal);
     }
 
     private void convertAndSave() {
-        for (CustomJsonObject.Meal mealItem : this.listOfMeals) {
-            System.out.println(mealItem.getMealName());
-        }
         Gson gson = new Gson();
-        this.listOfMeals.stream().forEach(meal -> System.out.println(gson.toJson(meal)));
+        this.listOfMeals.stream().forEach(meal -> makeFile(meal.getMealName(), gson.toJson(meal)));
         String mealJson = gson.toJson(this.listOfMeals);
         String mealJsonParsed = mealJson.substring(1, mealJson.length() - 1);
-        mealJson = mealJson.replace("{", "{\n");
-        mealJson = mealJson.replace("}", "\n}");
+
     }
+
+    private void makeFile(String mealName, String content) {
+        String path = String.format("resources/archive/meals/%s.json", mealName);
+        try {
+            File file = new File(path);
+            if (file.createNewFile()) {
+                System.out.println("File created: " + file.getName());
+                writeToFile(path, content);
+            } else {
+                System.out.println("File already exists.");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeToFile(String path, String content) {
+        try {
+            FileWriter myWriter = new FileWriter(path);
+            myWriter.write(content);
+            myWriter.close();
+            System.out.println(String.format("[ %s ] : populated.", path));
+        } catch (IOException e) {
+            System.out.println("An error occured.");
+            e.printStackTrace();
+        }
+    }
+
 
 
     public AppUtils() {
