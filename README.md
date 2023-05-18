@@ -1,4 +1,4 @@
-# Izola - Java (openjdk 17.0.5 2022-10-18)1
+# Izola - Java (openjdk 17.0.5 2022-10-18)
 # Repo for Home Appliance Projects
 Sections:
 - Refrigador
