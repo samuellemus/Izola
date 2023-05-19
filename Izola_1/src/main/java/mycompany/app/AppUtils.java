@@ -1,6 +1,5 @@
 package mycompany.app;
 
-
 import java.io.IOException;
 import java.io.File;
 import java.io.FilenameFilter;
@@ -25,7 +24,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 import com.google.gson.Gson;
 
-public class AppUtils {
+public class AppUtils extends App{
     ArrayList<String> rawIngredients = new ArrayList<>();
     ArrayList<String> ingredients = new ArrayList<>();
     ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
@@ -138,25 +137,28 @@ public class AppUtils {
         for (int i = 0; i < ingredients.size() ; i++) ingredientArray[i] = ingredients.get(i);
 
         String mealName = meal.strMeal;
+        String mealNameString = mealName.replace(" ", "_");
+        mealNameString = mealNameString.replace("&", "and");
+        mealNameString = mealNameString.replace("'", "");
 
-        rawMeasurements.add(meal.strMeasurement1);
-        rawMeasurements.add(meal.strMeasurement2);
-        rawMeasurements.add(meal.strMeasurement3);
-        rawMeasurements.add(meal.strMeasurement4);
-        rawMeasurements.add(meal.strMeasurement5);
-        rawMeasurements.add(meal.strMeasurement6);
-        rawMeasurements.add(meal.strMeasurement7);
-        rawMeasurements.add(meal.strMeasurement8);
-        rawMeasurements.add(meal.strMeasurement9);
-        rawMeasurements.add(meal.strMeasurement10);
-        rawMeasurements.add(meal.strMeasurement11);
-        rawMeasurements.add(meal.strMeasurement12);
-        rawMeasurements.add(meal.strMeasurement13);
-        rawMeasurements.add(meal.strMeasurement14);
-        rawMeasurements.add(meal.strMeasurement15);
+        rawMeasurements.add(meal.strMeasure1);
+        rawMeasurements.add(meal.strMeasure2);
+        rawMeasurements.add(meal.strMeasure3);
+        rawMeasurements.add(meal.strMeasure4);
+        rawMeasurements.add(meal.strMeasure5);
+        rawMeasurements.add(meal.strMeasure6);
+        rawMeasurements.add(meal.strMeasure7);
+        rawMeasurements.add(meal.strMeasure8);
+        rawMeasurements.add(meal.strMeasure9);
+        rawMeasurements.add(meal.strMeasure10);
+        rawMeasurements.add(meal.strMeasure11);
+        rawMeasurements.add(meal.strMeasure12);
+        rawMeasurements.add(meal.strMeasure13);
+        rawMeasurements.add(meal.strMeasure14);
+        rawMeasurements.add(meal.strMeasure15);
         rawMeasurements.stream().forEach(mm -> {
-                if (mm != null && ing.length() > 0) {
-                    measurements.add(ing);
+                if (mm != null && mm.length() > 0) {
+                    measurements.add(mm);
                 }
             });
         measurementArray = new String[measurements.size()];
@@ -167,7 +169,7 @@ public class AppUtils {
         String mealCategory = meal.strCategory;
         String mealArea = meal.strArea;
 
-        addToCollection(mealName,
+        addToCollection(mealNameString,
                         this.ingredientArray,
                         this.measurementArray,
                         mealDescription,
@@ -188,10 +190,6 @@ public class AppUtils {
                                  String mealInstructions,
                                  String mealCategory,
                                  String mealArea) {
-        String mealName = strMeal.replace(" ", "_");
-        mealName = mealName.replace("&", "and");
-        mealName = mealName.replace("'", "");
-        System.out.println(mealName);
         CustomJsonObject.Meal customMeal =
             new CustomJsonObject.Meal(mealName,
                                       ingredients,
@@ -270,12 +268,9 @@ public class AppUtils {
         }
     }
 
-
     public AppUtils() {
+        super();
+        this.userInterface();
         this.findFile();
-        for (CustomJsonObject.Meal meal : processedMeals) {
-            System.out.println(meal.getMealName());
-        }
-        //this.userInterface();
     }
 }

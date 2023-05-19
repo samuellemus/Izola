@@ -6,4 +6,3 @@ javac -d bin -cp bin:src/main/resources/gson/gson-2.10.1.jar src/main/java/mycom
 javac -d bin -cp bin:src/main/resources/gson/gson-2.10.1.jar src/main/java/mycompany/app/App.java
 
 java -cp bin:src/main/resources/gson/gson-2.10.1.jar mycompany.app.App
-rm -rf bin/*

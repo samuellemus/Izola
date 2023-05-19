@@ -43,7 +43,7 @@ public class CustomJsonObject {
             this.mealName = mealName;
             this.mealIngredients = mealIngredients;
             this.mealMeasurements = mealMeasurements;
-            this.mealDescription = mealDescriptions;
+            this.mealDescription = mealDescription;
             this.mealInstructions = mealInstructions;
             this.mealCategory = mealCategory;
             this.mealArea = mealArea;
@@ -94,21 +94,6 @@ public class CustomJsonObject {
 
 
     public static void main (String [] args) throws FileNotFoundException, IOException {
-
-        List < CustomJsonObject.Meal > meals = new ArrayList <> ();
-
-        String[] spaghettiIngredients = {"pasta", "tomato sauce", "salt"};
-        CustomJsonObject.Meal meal1 = new CustomJsonObject.Meal("Spaghetti", spaghettiIngredients);
-        String[] gcIngredients = {"sliced bread", "colby-jack cheese", "cheddar", "butter"};
-        CustomJsonObject.Meal meal2 = new CustomJsonObject.Meal("Grilled Cheese", gcIngredients);
-
-        meals.add(meal1);
-        meals.add(meal2);
-
-        Gson gson = new Gson();
-        String json = gson.toJson(meals);
-        json = json.replace("{", "{\n");
-        json = json.replace("}", "\n}");
-        System.out.println(json);
+        return;
     }
 }

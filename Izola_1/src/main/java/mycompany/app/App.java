@@ -21,6 +21,6 @@ import com.google.gson.Gson;
 public class App {
 
     public static void main( String[] args ) {
-        AppUtils utility = new AppUtils();
+        App utility = new AppUtils();
     }
 }
