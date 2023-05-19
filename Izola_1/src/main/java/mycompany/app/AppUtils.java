@@ -92,12 +92,12 @@ public class AppUtils extends App{
                                                                            + "\n this path is not coded yet");
         else if (value.toLowerCase().equals("pantry")) {
             System.out.println("Welcome to your pantry!");
-            System.out.println("Would you like to "
+            System.out.println("Would you like to [ ] ?"
                                + "\n[ 0 ] update pantry "
                                + "\n[ 1 ] show pantry contents "
                                + "\n[ 2 ] see what you can make "
                                + "\n[ 3 ] return"
-                               + "\n  ? ");
+                               + "\n:");
         }
 
     }
@@ -145,12 +145,10 @@ public class AppUtils extends App{
             });
         ingredientArray = new String[ingredients.size()];
         for (int i = 0; i < ingredients.size() ; i++) ingredientArray[i] = ingredients.get(i);
-
         String mealName = meal.strMeal;
         String mealNameString = mealName.replace(" ", "_");
         mealNameString = mealNameString.replace("&", "and");
         mealNameString = mealNameString.replace("'", "");
-
         rawMeasurements.add(meal.strMeasure1);
         rawMeasurements.add(meal.strMeasure2);
         rawMeasurements.add(meal.strMeasure3);
@@ -173,12 +171,10 @@ public class AppUtils extends App{
             });
         measurementArray = new String[measurements.size()];
         for (int i = 0; i < measurements.size() ; i++) measurementArray[i] = measurements.get(i);
-
         String mealDescription = meal.strDescription;
         String mealInstructions = meal.strInstructions;
         String mealCategory = meal.strCategory;
         String mealArea = meal.strArea;
-
         addToCollection(mealNameString,
                         this.ingredientArray,
                         this.measurementArray,
@@ -186,7 +182,6 @@ public class AppUtils extends App{
                         mealInstructions,
                         mealCategory,
                         mealArea);
-
         this.rawIngredients.clear();
         this.ingredients.clear();
         this.rawMeasurements.clear();
@@ -258,12 +253,16 @@ public class AppUtils extends App{
                     }
                 }};
         this.fileList = directoryPath.listFiles(jsonFilefilter);
-        System.out.println("List of files and directories in the specified path");
         for(File file : fileList) {
             processedMeals.add(gson.fromJson(getFileContent(file), CustomJsonObject.Meal.class));
-            System.out.println("File name: "+file.getName());
-            System.out.println("Size: " + file.getTotalSpace());
         }
+    }
+
+    private String[] compareIngredients() {
+        // make pantry ingredients object
+        // compare ingredients in pantry to ingredients in meals
+        System.out.println("Not implemented");
+        return null;
     }
 
     private String getFileContent(File file) {
@@ -284,6 +283,6 @@ public class AppUtils extends App{
     public AppUtils() {
         super();
         this.userInterface();
-        this.findFile();
+        //this.findFile();
     }
 }

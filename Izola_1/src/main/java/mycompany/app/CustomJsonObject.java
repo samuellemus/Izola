@@ -15,12 +15,24 @@ import com.google.gson.Gson;
 
 public class CustomJsonObject {
 
-    public static class MealCollection {
-        public CustomJsonObject.MealList[] meals;
-    }
+    public static class Pantry {
+        private String[] pantryIngredients;
 
-    public static class MealList {
-        public List<CustomJsonObject.Meal> mealList;
+        public Pantry(String[] pantryIngredients) {
+            super();
+            this.pantryIngredients = pantryIngredients;
+        }
+
+        public void setPantryIngredients(String[] ingredients) {
+            this.pantryIngredients = ingredients;
+        }
+        public String[] getPantryIngredients() {
+            return pantryIngredients;
+        }
+
+        public void savePantry() {
+
+        }
     }
 
     public static class Meal {
