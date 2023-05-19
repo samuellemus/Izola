@@ -289,7 +289,7 @@ public class AppUtils extends App {
                                + "\n[ 2 ] see what you can make "
                                + "\n[ 3 ] return"
                                + "\n:");
-            findPantryFile();
+            printPantryContents();
         }
     }
 
@@ -297,28 +297,36 @@ public class AppUtils extends App {
         updatePantry("{}");
     }
 
+    String pantryFilePath = "src/main/resources/archive/pantry/stock.json";
+
     public void updatePantry(String content) {
-        String path = "src/main/resources/archive/pantry/stock.json";
-        if (getFileContent(new File(path)) != null) {
-            System.out.println(getFileContent(new File(path)));
+        if (getFileContent(new File(pantryFilePath)) != null) {
+            System.out.println(getFileContent(new File(pantryFilePath)));
         } else {
-            writeToFile(path, content);
+            writeToFile(pantryFilePath, content);
         }
     }
 
-    public void findPantryFile() {
-        File file = new File("src/main/resources/archive/pantry/stock.json");
-        CustomJsonObject.Pantry pantry =
-            gson.fromJson(getFileContent(file), CustomJsonObject.Pantry.class);
+    public CustomJsonObject.Ingredient findPantryFile() {
+        File file = new File(pantryFilePath);
+        CustomJsonObject.Ingredient pantry =
+            gson.fromJson(getFileContent(file), CustomJsonObject.Ingredient.class);
         String[] ingArr = new String[]{"apple", "banana", "milk"};
         updatePantry(gson.toJson(ingArr));
+        return pantry;
+    }
+
+    public void printPantryContents() {
+       File pantryFile = new File(pantryFilePath);
+       CustomJsonObject.Ingredient pantry = findPantryFile();
+       for (String ingredient : pantry.getIngredients()) {
+           System.out.println(ingredient);
+       }
     }
 
     public AppUtils() {
         super();
         this.userInterface();
-
-        //this.findFile();
     }
 
 }
