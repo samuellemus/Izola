@@ -24,11 +24,11 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 import com.google.gson.Gson;
 
-public class AppUtils extends App{
+public class AppUtils extends App {
     ArrayList<String> rawIngredients = new ArrayList<>();
     ArrayList<String> ingredients = new ArrayList<>();
     ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
-    ArrayList<ResponseObject.MealDBMeal> meals;
+    ArrayList<ResponseObject.MealDBMeal> meals = new ArrayList<>();
     static String ENDPOINT_MEAL = "https://www.themealdb.com/api/json/v1/1";
     private String searchType;
     String searchItem;
@@ -70,48 +70,16 @@ public class AppUtils extends App{
         }
     }
 
-    /**
-     * trim allows the user to interact with the program to allow to custom modification
-     * of inquiries formatted and show in the CLI
-     **/
-    public void userInterface() {
-        // Create a Scanner object
-        Scanner scanner = new Scanner(System.in);
-        String json;
-        System.out.println("Welcome! How can I help you?");
-        System.out.println("[options] [search] [pantry]");
-        String value = scanner.nextLine();
-        if (value.toLowerCase().equals("search")) {
-            System.out.println("You chose search.\n Which meal are you looking for?");
-            String mealString = scanner.nextLine();
-            System.out.printf("Searching for %s\n", mealString);
-            searchMealDB(mealString, "search")
-                .ifPresent(result -> processMealDBResult(result));
-        }
-        else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
-                                                                           + "\n this path is not coded yet");
-        else if (value.toLowerCase().equals("pantry")) {
-            System.out.println("Welcome to your pantry!");
-            System.out.println("Would you like to [ ] ?"
-                               + "\n[ 0 ] update pantry "
-                               + "\n[ 1 ] show pantry contents "
-                               + "\n[ 2 ] see what you can make "
-                               + "\n[ 3 ] return"
-                               + "\n:");
-        }
-
-    }
-
-    private void processMealDBResult(ResponseObject.MealDBResult result) {
+    public void processMealDBResult(ResponseObject.MealDBResult result) {
         if (result.meals != null) {
-            meals = new ArrayList<>();
+            meals.clear();
             for (ResponseObject.MealDBMeal meal : result.meals) meals.add(meal);
             System.out.printf("There are %s meals available.\n", meals.size());
             meals.stream().forEach(meal -> processMeal(meal));
             System.out.println("There is a possible "
                            + knownIngredients.size()
                            + " unique ingredients to choose from.");
-            convertAndSave();
+            this.convertAndSave();
         } else {
             System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
@@ -207,8 +175,7 @@ public class AppUtils extends App{
     }
 
     private void convertAndSave() {
-        Gson gson = new Gson();
-        this.listOfMeals.stream().forEach(meal -> makeFile(meal.getMealName(), gson.toJson(meal)));
+        listOfMeals.stream().forEach(meal -> makeFile(meal.getMealName(), this.gson.toJson(meal)));
     }
 
     private void makeFile(String mealName, String content) {
@@ -241,7 +208,7 @@ public class AppUtils extends App{
     File directoryPath;
     FilenameFilter jsonFilefilter;
     File fileList[];
-    private void findFile() {
+    private void findMealFiles() {
         this.directoryPath = new File("src/main/resources/archive/meals");
         this.jsonFilefilter = new FilenameFilter() {
                 public boolean accept(File dir, String name) {
@@ -275,14 +242,68 @@ public class AppUtils extends App{
             }
             return content;
         } catch (IOException e) {
-            e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * trim allows the user to interact with the program to allow to custom modification
+     * of inquiries formatted and show in the CLI
+     **/
+    public void userInterface() {
+        // Create a Scanner object
+        Scanner scanner = new Scanner(System.in);
+        String json;
+        System.out.println("Welcome! How can I help you?");
+        System.out.println("[options] [search] [pantry]");
+        String value = scanner.nextLine();
+        if (value.toLowerCase().equals("search")) {
+            System.out.println("You chose search.\n Which meal are you looking for?");
+            String mealString = scanner.nextLine();
+            System.out.printf("Searching for %s\n", mealString);
+            searchMealDB(mealString, "search")
+                .ifPresent(result -> processMealDBResult(result));
+        }
+        else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
+                                                                           + "\n this path is not coded yet");
+        else if (value.toLowerCase().equals("pantry")) {
+            System.out.println("Welcome to your pantry!");
+            System.out.println("Would you like to [ ] ?"
+                               + "\n[ 0 ] update pantry "
+                               + "\n[ 1 ] show pantry contents "
+                               + "\n[ 2 ] see what you can make "
+                               + "\n[ 3 ] return"
+                               + "\n:");
+            findPantryFile();
+        }
+    }
+
+    public void updatePantry() {
+        updatePantry("{}");
+    }
+
+    public void updatePantry(String content) {
+        String path = "src/main/resources/archive/pantry/stock.json";
+        if (getFileContent(new File(path)) != null) {
+            System.out.println(getFileContent(new File(path)));
+        } else {
+            writeToFile(path, content);
+        }
+    }
+
+    public void findPantryFile() {
+        File file = new File("src/main/resources/archive/pantry/stock.json");
+        //CustomJsonObject.Pantry pantry =
+        //    gson.fromJson(getFileContent(file), CustomJsonObject.Ingredients.class);
+        String[] ingArr = new String[]{"apple", "banana"};
+        System.out.println(gson.toJson(ingArr));
     }
 
     public AppUtils() {
         super();
         this.userInterface();
+
         //this.findFile();
     }
+
 }

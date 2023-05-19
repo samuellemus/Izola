@@ -16,22 +16,22 @@ import com.google.gson.Gson;
 public class CustomJsonObject {
 
     public static class Pantry {
-        private String[] pantryIngredients;
+        public CustomJsonObject.Ingredient pantryIngredients;
+    }
 
-        public Pantry(String[] pantryIngredients) {
-            super();
-            this.pantryIngredients = pantryIngredients;
+    public static class Ingredient {
+        private String[] ingredients;
+
+        public Ingredient(String[] ingredients) {
+            this.ingredients = ingredients;
         }
 
-        public void setPantryIngredients(String[] ingredients) {
-            this.pantryIngredients = ingredients;
-        }
-        public String[] getPantryIngredients() {
-            return pantryIngredients;
+        public void setIngredients(String[] ingredients) {
+            this.ingredients = ingredients;
         }
 
-        public void savePantry() {
-
+        public String[] getIngredients() {
+            return ingredients;
         }
     }
 
