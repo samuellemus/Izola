@@ -278,7 +278,7 @@ public class AppUtils extends App {
         }
     }
 
-    public void updatePantry() {
+    public void emptyPantry() {
         updatePantry("{}");
     }
 
@@ -293,9 +293,10 @@ public class AppUtils extends App {
 
     public void findPantryFile() {
         File file = new File("src/main/resources/archive/pantry/stock.json");
-        //CustomJsonObject.Pantry pantry =
-        //    gson.fromJson(getFileContent(file), CustomJsonObject.Ingredients.class);
-        String[] ingArr = new String[]{"apple", "banana"};
+        CustomJsonObject.Pantry pantry =
+            gson.fromJson(getFileContent(file), CustomJsonObject.Pantry.class);
+        String[] ingArr = new String[]{"apple", "banana", "milk"};
+        updatePantry(gson.toJson(ingArr));
         System.out.println(gson.toJson(ingArr));
     }
 
