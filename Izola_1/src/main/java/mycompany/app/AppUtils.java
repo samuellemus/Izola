@@ -25,20 +25,25 @@ import java.util.stream.Collectors;
 import com.google.gson.Gson;
 
 public class AppUtils extends App {
-    ArrayList<String> rawIngredients = new ArrayList<>();
-    ArrayList<String> ingredients = new ArrayList<>();
-    ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
-    ArrayList<ResponseObject.MealDBMeal> meals = new ArrayList<>();
+
     static String ENDPOINT_MEAL = "https://www.themealdb.com/api/json/v1/1";
     private String searchType;
     String searchItem;
     String json;
     private static final Gson gson = new Gson();
     String[] ingredientArray;
+    String[] measurementArray;
     HashSet<String> knownIngredients = new HashSet<>();
+    List<ResponseObject.MealDBMeal> meals = new ArrayList<>();
     List<CustomJsonObject.Meal> listOfMeals = new ArrayList<>();
-    List<String> fileContents = new ArrayList<>();
     List<CustomJsonObject.Meal> processedMeals = new ArrayList<>();
+    List<String> rawIngredients = new ArrayList<>();
+    List<String> ingredients = new ArrayList<>();
+    List<String> fileContents = new ArrayList<>();
+    List<String> rawMeasurements = new ArrayList<>();
+    List<String> measurements = new ArrayList<>();
+    String pantryFilePath = "src/main/resources/archive/pantry/stock.json";
+    String mealJsonUri = "src/main/resources/archive/meals/";
 
     public HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
@@ -84,10 +89,6 @@ public class AppUtils extends App {
             System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
     }
-
-    List<String> rawMeasurements = new ArrayList<>();
-    List<String> measurements = new ArrayList<>();
-    String[] measurementArray;
 
     private void processMeal(ResponseObject.MealDBMeal meal) {
         rawIngredients.add(meal.strIngredient1);
@@ -173,9 +174,6 @@ public class AppUtils extends App {
                                       mealArea);
         this.listOfMeals.add(customMeal);
     }
-
-
-    String mealJsonUri = "src/main/resources/archive/meals/";
 
     private void convertAndSave() {
         listOfMeals.stream().forEach(meal -> makeFile(mealJsonUri, meal.getMealName(), this.gson.toJson(meal)));
@@ -296,8 +294,6 @@ public class AppUtils extends App {
     public void emptyPantry() {
         updatePantry("{}");
     }
-
-    String pantryFilePath = "src/main/resources/archive/pantry/stock.json";
 
     public void updatePantry(String content) {
         if (getFileContent(new File(pantryFilePath)) != null) {
