@@ -174,17 +174,20 @@ public class AppUtils extends App {
         this.listOfMeals.add(customMeal);
     }
 
+
+    String mealJsonUri = "src/main/resources/archive/meals/";
+
     private void convertAndSave() {
-        listOfMeals.stream().forEach(meal -> makeFile(meal.getMealName(), this.gson.toJson(meal)));
+        listOfMeals.stream().forEach(meal -> makeFile(mealJsonUri, meal.getMealName(), this.gson.toJson(meal)));
     }
 
-    private void makeFile(String mealName, String content) {
-        String path = String.format("src/main/resources/archive/meals/%s.json", mealName);
+    private void makeFile(String path, String mealName, String content) {
+        String filePath = String.format("%s%s.json", path, mealName);
         try {
-            File file = new File(path);
+            File file = new File(filePath);
             if (file.createNewFile()) {
                 System.out.println("File created: " + file.getName());
-                writeToFile(path, content);
+                writeToFile(filePath, content);
             } else {
                 System.out.println("File already exists.");
             }
@@ -196,7 +199,11 @@ public class AppUtils extends App {
     private void writeToFile(String path, String content) {
         try {
             FileWriter myWriter = new FileWriter(path);
-            myWriter.write(content);
+            if (!content.startsWith("{")) {
+                myWriter.write("{" + "\"ingredients\":" + content + "}");
+            } else {
+                myWriter.write(content);
+            }
             myWriter.close();
             System.out.println(String.format("[ %s ] : populated.", path));
         } catch (IOException e) {
@@ -232,6 +239,14 @@ public class AppUtils extends App {
         return null;
     }
 
+
+    /**
+     * getFileContent takes an input of type File.
+     * Then, reads all the lines of the file and condenses the lines into a single
+     * String variable.
+     * @param file of type File
+     * @return String
+     **/
     private String getFileContent(File file) {
         List<String> lines;
         String content = "";
@@ -247,8 +262,8 @@ public class AppUtils extends App {
     }
 
     /**
-     * trim allows the user to interact with the program to allow to custom modification
-     * of inquiries formatted and show in the CLI
+     * userInterface allows the user to interact with the program to allow to custom modification
+     * of inquiries formatted and shown in the CLI
      **/
     public void userInterface() {
         // Create a Scanner object
@@ -297,7 +312,6 @@ public class AppUtils extends App {
             gson.fromJson(getFileContent(file), CustomJsonObject.Pantry.class);
         String[] ingArr = new String[]{"apple", "banana", "milk"};
         updatePantry(gson.toJson(ingArr));
-        System.out.println(gson.toJson(ingArr));
     }
 
     public AppUtils() {

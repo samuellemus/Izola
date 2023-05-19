@@ -21,9 +21,15 @@ public class CustomJsonObject {
 
     public static class Ingredient {
         private String[] ingredients;
+        private String[] quantities;
 
         public Ingredient(String[] ingredients) {
             this.ingredients = ingredients;
+        }
+
+        public Ingredient(String[] ingredients, String[] quantities) {
+            this.ingredients = ingredients;
+            this.quantities = quantities;
         }
 
         public void setIngredients(String[] ingredients) {
@@ -32,6 +38,14 @@ public class CustomJsonObject {
 
         public String[] getIngredients() {
             return ingredients;
+        }
+
+        public void setQuantities(String[] quantities) {
+            this.quantities = quantities;
+        }
+
+        public String[] getQuantities() {
+            return quantities;
         }
     }
 
