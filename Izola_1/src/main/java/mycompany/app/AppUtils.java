@@ -79,7 +79,7 @@ public class AppUtils extends App{
         Scanner scanner = new Scanner(System.in);
         String json;
         System.out.println("Welcome! How can I help you?");
-        System.out.println("[options] [search]");
+        System.out.println("[options] [search] [pantry]");
         String value = scanner.nextLine();
         if (value.toLowerCase().equals("search")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
@@ -90,6 +90,16 @@ public class AppUtils extends App{
         }
         else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
                                                                            + "\n this path is not coded yet");
+        else if (value.toLowerCase().equals("pantry")) {
+            System.out.println("Welcome to your pantry!");
+            System.out.println("Would you like to "
+                               + "\n[ 0 ] update pantry "
+                               + "\n[ 1 ] show pantry contents "
+                               + "\n[ 2 ] see what you can make "
+                               + "\n[ 3 ] return"
+                               + "\n  ? ");
+        }
+
     }
 
     private void processMealDBResult(ResponseObject.MealDBResult result) {
@@ -233,9 +243,12 @@ public class AppUtils extends App{
         }
     }
 
+    File directoryPath;
+    FilenameFilter jsonFilefilter;
+    File fileList[];
     private void findFile() {
-        File directoryPath = new File("src/main/resources/archive/meals");
-        FilenameFilter jsonFilefilter = new FilenameFilter() {
+        this.directoryPath = new File("src/main/resources/archive/meals");
+        this.jsonFilefilter = new FilenameFilter() {
                 public boolean accept(File dir, String name) {
                     String lowercaseName = name.toLowerCase();
                     if (lowercaseName.endsWith(".json")) {
@@ -244,7 +257,7 @@ public class AppUtils extends App{
                         return false;
                     }
                 }};
-        File fileList[] = directoryPath.listFiles(jsonFilefilter);
+        this.fileList = directoryPath.listFiles(jsonFilefilter);
         System.out.println("List of files and directories in the specified path");
         for(File file : fileList) {
             processedMeals.add(gson.fromJson(getFileContent(file), CustomJsonObject.Meal.class));
