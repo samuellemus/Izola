@@ -32,10 +32,21 @@ public class CustomJsonObject {
         private String mealCategory;
         private String mealArea;
 
-        public Meal(String mealName, String[] mealIngredients) {
+        public Meal(String mealName,
+                    String[] mealIngredients,
+                    String[] mealMeasurements,
+                    String mealDescription,
+                    String mealInstructions,
+                    String mealCategory,
+                    String mealArea) {
             super();
             this.mealName = mealName;
             this.mealIngredients = mealIngredients;
+            this.mealMeasurements = mealMeasurements;
+            this.mealDescription = mealDescriptions;
+            this.mealInstructions = mealInstructions;
+            this.mealCategory = mealCategory;
+            this.mealArea = mealArea;
         }
         public String getMealName() {
             return mealName;

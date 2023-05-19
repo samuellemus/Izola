@@ -3,6 +3,7 @@ package mycompany.app;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -13,15 +14,18 @@ import java.net.http.HttpClient;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import com.google.gson.Gson;
 
-public class AppUtils extends App{
+public class AppUtils {
     ArrayList<String> rawIngredients = new ArrayList<>();
     ArrayList<String> ingredients = new ArrayList<>();
     ArrayList<ArrayList<String>> mealIngredients = new ArrayList<>();
@@ -34,6 +38,8 @@ public class AppUtils extends App{
     String[] ingredientArray;
     HashSet<String> knownIngredients = new HashSet<>();
     List<CustomJsonObject.Meal> listOfMeals = new ArrayList<>();
+    List<String> fileContents = new ArrayList<>();
+    List<CustomJsonObject.Meal> processedMeals = new ArrayList<>();
 
     public HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
@@ -102,6 +108,10 @@ public class AppUtils extends App{
         }
     }
 
+    List<String> rawMeasurements = new ArrayList<>();
+    List<String> measurements = new ArrayList<>();
+    String[] measurementArray;
+
     private void processMeal(ResponseObject.MealDBMeal meal) {
         rawIngredients.add(meal.strIngredient1);
         rawIngredients.add(meal.strIngredient2);
@@ -117,6 +127,7 @@ public class AppUtils extends App{
         rawIngredients.add(meal.strIngredient12);
         rawIngredients.add(meal.strIngredient13);
         rawIngredients.add(meal.strIngredient14);
+        rawIngredients.add(meal.strIngredient15);
         rawIngredients.stream().forEach(ing -> {
                 if (ing != null && ing.length() > 0) {
                     ingredients.add(ing);
@@ -125,19 +136,70 @@ public class AppUtils extends App{
             });
         ingredientArray = new String[ingredients.size()];
         for (int i = 0; i < ingredients.size() ; i++) ingredientArray[i] = ingredients.get(i);
-        String mealString = meal.strMeal;
-        addToCollection(mealString, this.ingredientArray);
+
+        String mealName = meal.strMeal;
+
+        rawMeasurements.add(meal.strMeasurement1);
+        rawMeasurements.add(meal.strMeasurement2);
+        rawMeasurements.add(meal.strMeasurement3);
+        rawMeasurements.add(meal.strMeasurement4);
+        rawMeasurements.add(meal.strMeasurement5);
+        rawMeasurements.add(meal.strMeasurement6);
+        rawMeasurements.add(meal.strMeasurement7);
+        rawMeasurements.add(meal.strMeasurement8);
+        rawMeasurements.add(meal.strMeasurement9);
+        rawMeasurements.add(meal.strMeasurement10);
+        rawMeasurements.add(meal.strMeasurement11);
+        rawMeasurements.add(meal.strMeasurement12);
+        rawMeasurements.add(meal.strMeasurement13);
+        rawMeasurements.add(meal.strMeasurement14);
+        rawMeasurements.add(meal.strMeasurement15);
+        rawMeasurements.stream().forEach(mm -> {
+                if (mm != null && ing.length() > 0) {
+                    measurements.add(ing);
+                }
+            });
+        measurementArray = new String[measurements.size()];
+        for (int i = 0; i < measurements.size() ; i++) measurementArray[i] = measurements.get(i);
+
+        String mealDescription = meal.strDescription;
+        String mealInstructions = meal.strInstructions;
+        String mealCategory = meal.strCategory;
+        String mealArea = meal.strArea;
+
+        addToCollection(mealName,
+                        this.ingredientArray,
+                        this.measurementArray,
+                        mealDescription,
+                        mealInstructions,
+                        mealCategory,
+                        mealArea);
+
         this.rawIngredients.clear();
         this.ingredients.clear();
+        this.rawMeasurements.clear();
+        this.measurements.clear();
     }
 
-    private void addToCollection(String strMeal, String[] ingredients) {
+    private void addToCollection(String mealName,
+                                 String[] ingredients,
+                                 String[] measurements,
+                                 String mealDescription,
+                                 String mealInstructions,
+                                 String mealCategory,
+                                 String mealArea) {
         String mealName = strMeal.replace(" ", "_");
         mealName = mealName.replace("&", "and");
         mealName = mealName.replace("'", "");
         System.out.println(mealName);
         CustomJsonObject.Meal customMeal =
-            new CustomJsonObject.Meal(mealName, ingredients);
+            new CustomJsonObject.Meal(mealName,
+                                      ingredients,
+                                      measurements,
+                                      mealDescription,
+                                      mealInstructions,
+                                      mealCategory,
+                                      mealArea);
         this.listOfMeals.add(customMeal);
     }
 
@@ -147,7 +209,7 @@ public class AppUtils extends App{
     }
 
     private void makeFile(String mealName, String content) {
-        String path = String.format("resources/archive/meals/%s.json", mealName);
+        String path = String.format("src/main/resources/archive/meals/%s.json", mealName);
         try {
             File file = new File(path);
             if (file.createNewFile()) {
@@ -173,7 +235,47 @@ public class AppUtils extends App{
         }
     }
 
+    private void findFile() {
+        File directoryPath = new File("src/main/resources/archive/meals");
+        FilenameFilter jsonFilefilter = new FilenameFilter() {
+                public boolean accept(File dir, String name) {
+                    String lowercaseName = name.toLowerCase();
+                    if (lowercaseName.endsWith(".json")) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }};
+        File fileList[] = directoryPath.listFiles(jsonFilefilter);
+        System.out.println("List of files and directories in the specified path");
+        for(File file : fileList) {
+            processedMeals.add(gson.fromJson(getFileContent(file), CustomJsonObject.Meal.class));
+            System.out.println("File name: "+file.getName());
+            System.out.println("Size: " + file.getTotalSpace());
+        }
+    }
+
+    private String getFileContent(File file) {
+        List<String> lines;
+        String content = "";
+        try {
+            lines = Files.readAllLines(file.toPath(), StandardCharsets.UTF_8);
+            for (String line : lines) {
+                content += line;
+            }
+            return content;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
     public AppUtils() {
-        this.userInterface();
+        this.findFile();
+        for (CustomJsonObject.Meal meal : processedMeals) {
+            System.out.println(meal.getMealName());
+        }
+        //this.userInterface();
     }
 }
