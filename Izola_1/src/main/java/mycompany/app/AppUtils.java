@@ -286,8 +286,7 @@ public class AppUtils extends App {
                                + "\n[ 0 ] update pantry "
                                + "\n[ 1 ] show pantry contents "
                                + "\n[ 2 ] see what you can make "
-                               + "\n[ 3 ] return"
-                               + "\n:");
+                               + "\n[ 3 ] return");
             handlePantry();
         }
     }
@@ -321,17 +320,19 @@ public class AppUtils extends App {
             System.out.println("You chose to remove an item. \n Which one would that be?");
             System.out.println("jk havent coded this part yet! ");
         } else if (value.equals("1")) {
-            System.out.println("Your chose to add (an) item(s). \n Type your item(s) (*give note here*)");
+            System.out.println("Your chose to add (an) item(s). \n Type your item(s)"
+                               + " (*type \"exit\" when finished adding items*)");
+            addToPantry();
         } else if (value.equals("2")) {
             System.out.println("You chose to audit the pantry. Contact administrator. ");
         }
     }
 
     public void emptyPantry() {
-        writeToPantry("[]");
+        writeToPantryFile("[]");
     }
 
-    public void writeToPantry(String content) {
+    public void writeToPantryFile(String content) {
         if (getFileContent(new File(pantryFilePath)) != null) {
             System.out.println(getFileContent(new File(pantryFilePath)));
         } else {
@@ -339,16 +340,17 @@ public class AppUtils extends App {
         }
     }
 
+    String[] exampleIngArr = new String[]{"apple", "banana", "grapefruit"};
+
     public CustomJsonObject.Ingredient findPantryFile() {
         File file = new File(pantryFilePath);
         CustomJsonObject.Ingredient pantry =
             gson.fromJson(getFileContent(file), CustomJsonObject.Ingredient.class);
-        String[] ingArr = new String[]{"apple", "banana", "milk"};
         List<String> ingList = new ArrayList<>();
-        ingList.addAll(Arrays.asList(ingArr));
+        ingList.addAll(Arrays.asList(exampleIngArr));
         System.out.println(gson.toJson(ingList));
-        System.out.println(gson.toJson(ingArr));
-        //writeToPantry(gson.toJson(ingArr));
+        System.out.println(gson.toJson(exampleIngArr));
+        writeToPantryFile(gson.toJson(exampleIngArr));
         return pantry;
     }
 
@@ -358,6 +360,28 @@ public class AppUtils extends App {
        for (String ingredient : pantry.getIngredients()) {
            System.out.println(ingredient);
        }
+    }
+
+    List<String> newPantryItems = new ArrayList<>();
+
+    public void addToPantry() {
+        Scanner scanner = new Scanner(System.in);
+        String json;
+        String value = scanner.nextLine();
+        if (value.equals("exit")) {
+            System.out.println("Would you like to see your inventory?"
+                               + "\n[ 0 ] yes"
+                               + "\n[ 1 ] no");
+            value = scanner.nextLine();
+            if (value.equals("0")) {
+                printPantryContents();
+            } else {
+                return;
+            }
+        } else {
+            newPantryItems.add(value);
+            addToPantry();
+        }
     }
 
     public AppUtils() {
