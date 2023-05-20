@@ -180,11 +180,7 @@ public class AppUtils extends App {
 
     /** EDIT START */
     private void convertAndSave() {
-        listOfMeals.stream().forEach(meal -> {
-                //makeFile(mealFilePath, meal.getMealName(), this.gson.toJson(meal));
-                writeToFile(mealsFilePath, this.gson.toJson(meal), "meals");
-            });
-
+        writeToFile(mealsFilePath, gson.toJson(this.listOfMeals), "meals");
     }
 
     private void makeFile (String path, String mealName, String content) {
