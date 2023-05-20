@@ -85,7 +85,7 @@ public class AppUtils extends App {
             System.out.println("There is a possible "
                            + knownIngredients.size()
                            + " unique ingredients to choose from.");
-            this.convertAndSave();
+            writeToFile(mealsFilePath, gson.toJson(this.listOfMeals), "meals");
         } else {
             System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
@@ -176,30 +176,6 @@ public class AppUtils extends App {
         this.listOfMeals.add(customMeal);
     }
 
-
-
-    /** EDIT START */
-    private void convertAndSave() {
-        writeToFile(mealsFilePath, gson.toJson(this.listOfMeals), "meals");
-    }
-
-    private void makeFile (String path, String mealName, String content) {
-        try {
-            File file = new File(path);
-            if (file.createNewFile()) {
-                System.out.println("File created: " + file.getName());
-                writeToFile(path, content, "meals");
-            } else {
-                System.out.println("File already exists.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    /** EDIT END */
-
-
-
     private void writeToFile(String path, String content, String type) {
         try {
             FileWriter myWriter = new FileWriter(path);
@@ -237,14 +213,6 @@ public class AppUtils extends App {
         }
     }
 
-    private String[] compareIngredients() {
-        // make pantry ingredients object
-        // compare ingredients in pantry to ingredients in meals
-        System.out.println("Not implemented");
-        return null;
-    }
-
-
     /**
      * getFileContent takes an input of type File.
      * Then, reads all the lines of the file and condenses the lines into a single
@@ -275,19 +243,22 @@ public class AppUtils extends App {
         Scanner scanner = new Scanner(System.in);
         String json;
         System.out.println("Welcome! How can I help you?");
-        System.out.println("[options] [search] [pantry]");
+        System.out.println("[0] options"
+                           + "\n[1] search"
+                           + "\n[2] pantry"
+                           + "\n[3] list known meals");
         String value = scanner.nextLine();
-        if (value.toLowerCase().equals("search")) {
+        if (value.toLowerCase().equals("1")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
             System.out.printf("Searching for %s\n", mealString);
             searchMealDB(mealString, "search")
                 .ifPresent(result -> processMealDBResult(result));
         }
-        else if (value.toLowerCase().equals("options")) {
+        else if (value.toLowerCase().equals("0")) {
             System.out.println("You chose options.\n this path is not coded yet");
         }
-        else if (value.toLowerCase().equals("pantry")) {
+        else if (value.toLowerCase().equals("2")) {
             System.out.println("Welcome to your pantry!");
             System.out.println("Would you like to [ ] ?"
                                + "\n[ 0 ] update pantry "
@@ -295,6 +266,9 @@ public class AppUtils extends App {
                                + "\n[ 2 ] see what you can make "
                                + "\n[ 3 ] return");
             handlePantry();
+        } else if (value.toLowerCase().equals("3")) {
+            System.out.println("You chose to list known meals. ");
+            printKnownMeals();
         }
     }
 
@@ -381,6 +355,18 @@ public class AppUtils extends App {
             addToPantry();
         }
     }
+
+    public void printKnownMeals() {
+        File file = new File(mealsFilePath);
+        CustomJsonObject.MealItems meals =
+            gson.fromJson(getFileContent(file), CustomJsonObject.MealItems.class);
+        for (CustomJsonObject.Meal meal : meals.meals) {
+            System.out.println(meal.getMealName()
+                               + "\n "
+                               + Arrays.asList(meal.getMealIngredients()));
+        }
+    }
+
 
     public AppUtils() {
         super();
