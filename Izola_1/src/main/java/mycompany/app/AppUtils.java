@@ -260,7 +260,7 @@ public class AppUtils extends App {
     }
 
     /**
-     * userInterface allows the user to interact with the program to allow to custom modification
+     * userInterface permits the user to interact with the program to allow to custom modification
      * of inquiries formatted and shown in the CLI
      **/
     public void userInterface() {
@@ -277,8 +277,9 @@ public class AppUtils extends App {
             searchMealDB(mealString, "search")
                 .ifPresent(result -> processMealDBResult(result));
         }
-        else if (value.toLowerCase().equals("options")) System.out.println("You chose options."
-                                                                           + "\n this path is not coded yet");
+        else if (value.toLowerCase().equals("options")) {
+            System.out.println("You chose options.\n this path is not coded yet");
+        }
         else if (value.toLowerCase().equals("pantry")) {
             System.out.println("Welcome to your pantry!");
             System.out.println("Would you like to [ ] ?"
@@ -287,15 +288,50 @@ public class AppUtils extends App {
                                + "\n[ 2 ] see what you can make "
                                + "\n[ 3 ] return"
                                + "\n:");
+            handlePantry();
+        }
+    }
+
+    public void handlePantry() {
+        Scanner scanner = new Scanner(System.in);
+        String json;
+        String value = scanner.nextLine();
+        if (value.equals("0")) {
+            System.out.println("Choice: Update Pantry");
+            updatePantry();
+        } else if (value.equals("1")) {
+            System.out.println("Choice: Show Pantry Contents");
             printPantryContents();
+        } else if (value.equals("2")) {
+            System.out.println("Choice: see what you can make");
+        } else {
+            System.out.println("Choice: return");
+        }
+    }
+
+    public void updatePantry() {
+        Scanner scanner = new Scanner(System.in);
+        String json;
+        System.out.println("Would you like to [ ] ?"
+                           + "\n[ 0 ] remove an item"
+                           + "\n[ 1 ] add (an) item(s)"
+                           + "\n[ 2 ] audit pantry");
+        String value = scanner.nextLine();
+        if (value.equals("0")) {
+            System.out.println("You chose to remove an item. \n Which one would that be?");
+            System.out.println("jk havent coded this part yet! ");
+        } else if (value.equals("1")) {
+            System.out.println("Your chose to add (an) item(s). \n Type your item(s) (*give note here*)");
+        } else if (value.equals("2")) {
+            System.out.println("You chose to audit the pantry. Contact administrator. ");
         }
     }
 
     public void emptyPantry() {
-        updatePantry("{}");
+        writeToPantry("[]");
     }
 
-    public void updatePantry(String content) {
+    public void writeToPantry(String content) {
         if (getFileContent(new File(pantryFilePath)) != null) {
             System.out.println(getFileContent(new File(pantryFilePath)));
         } else {
@@ -308,7 +344,11 @@ public class AppUtils extends App {
         CustomJsonObject.Ingredient pantry =
             gson.fromJson(getFileContent(file), CustomJsonObject.Ingredient.class);
         String[] ingArr = new String[]{"apple", "banana", "milk"};
-        updatePantry(gson.toJson(ingArr));
+        List<String> ingList = new ArrayList<>();
+        ingList.addAll(Arrays.asList(ingArr));
+        System.out.println(gson.toJson(ingList));
+        System.out.println(gson.toJson(ingArr));
+        //writeToPantry(gson.toJson(ingArr));
         return pantry;
     }
 
@@ -324,5 +364,4 @@ public class AppUtils extends App {
         super();
         this.userInterface();
     }
-
 }
