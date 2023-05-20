@@ -15,10 +15,6 @@ import com.google.gson.Gson;
 
 public class CustomJsonObject {
 
-    public static class Pantry {
-        public CustomJsonObject.Ingredient pantryIngredients;
-    }
-
     public static class Ingredient {
         private String[] ingredients;
         private String[] quantities;
@@ -47,6 +43,10 @@ public class CustomJsonObject {
         public String[] getQuantities() {
             return quantities;
         }
+    }
+
+    public static class MealItems {
+        public CustomJsonObject.Meal[] meals;
     }
 
     public static class Meal {
