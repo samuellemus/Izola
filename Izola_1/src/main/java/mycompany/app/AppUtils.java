@@ -212,7 +212,8 @@ public class AppUtils extends App {
 
     File directoryPath;
     FilenameFilter jsonFilefilter;
-    File fileList[];
+    File[] fileList;
+
     private void findMealFiles() {
         this.directoryPath = new File("src/main/resources/archive/meals");
         this.jsonFilefilter = new FilenameFilter() {
@@ -314,7 +315,8 @@ public class AppUtils extends App {
         System.out.println("Would you like to [ ] ?"
                            + "\n[ 0 ] remove an item"
                            + "\n[ 1 ] add (an) item(s)"
-                           + "\n[ 2 ] audit pantry");
+                           + "\n[ 2 ] audit pantry"
+                           + "\n[ 3 ] go back an option set");
         String value = scanner.nextLine();
         if (value.equals("0")) {
             System.out.println("You chose to remove an item. \n Which one would that be?");
@@ -322,47 +324,43 @@ public class AppUtils extends App {
         } else if (value.equals("1")) {
             System.out.println("Your chose to add (an) item(s). \n Type your item(s)"
                                + " (*type \"exit\" when finished adding items*)");
+            fillCurrentPantryList();
+            pantryItemList.addAll(Arrays.asList(pantry.getIngredients()));
             addToPantry();
         } else if (value.equals("2")) {
             System.out.println("You chose to audit the pantry. Contact administrator. ");
         }
     }
 
-    public void emptyPantry() {
-        writeToPantryFile("[]");
-    }
-
-    public void writeToPantryFile(String content) {
-        if (getFileContent(new File(pantryFilePath)) != null) {
-            System.out.println(getFileContent(new File(pantryFilePath)));
-        } else {
-            writeToFile(pantryFilePath, content);
-        }
-    }
-
+    File pantryFile = new File(pantryFilePath);
     String[] exampleIngArr = new String[]{"apple", "banana", "grapefruit"};
+    List<String> pantryItemList = new ArrayList<>();
+    List<String> newPantryItems = new ArrayList<>();
+
+    CustomJsonObject.Ingredient pantry =
+        gson.fromJson(getFileContent(pantryFile), CustomJsonObject.Ingredient.class);
 
     public CustomJsonObject.Ingredient findPantryFile() {
-        File file = new File(pantryFilePath);
-        CustomJsonObject.Ingredient pantry =
-            gson.fromJson(getFileContent(file), CustomJsonObject.Ingredient.class);
-        List<String> ingList = new ArrayList<>();
-        ingList.addAll(Arrays.asList(exampleIngArr));
-        System.out.println(gson.toJson(ingList));
-        System.out.println(gson.toJson(exampleIngArr));
-        writeToPantryFile(gson.toJson(exampleIngArr));
+        File currentPantryFile = new File(pantryFilePath);
+        CustomJsonObject.Ingredient currentPantry =
+            gson.fromJson(getFileContent(pantryFile), CustomJsonObject.Ingredient.class);
+        for (String ingredient : currentPantry.getIngredients()) {
+            newPantryItems.add(ingredient);
+        }
         return pantry;
     }
 
-    public void printPantryContents() {
-       File pantryFile = new File(pantryFilePath);
-       CustomJsonObject.Ingredient pantry = findPantryFile();
-       for (String ingredient : pantry.getIngredients()) {
-           System.out.println(ingredient);
-       }
+    public void fillCurrentPantryList() {
+        pantryItemList.addAll(Arrays.asList(pantry.getIngredients()));
     }
 
-    List<String> newPantryItems = new ArrayList<>();
+    public void printPantryContents() {
+        File pantryFile = new File(pantryFilePath);
+        CustomJsonObject.Ingredient pantry = findPantryFile();
+        for (String ingredient : pantry.getIngredients()) {
+            System.out.println(ingredient);
+        }
+    }
 
     public void addToPantry() {
         Scanner scanner = new Scanner(System.in);
@@ -374,12 +372,13 @@ public class AppUtils extends App {
                                + "\n[ 1 ] no");
             value = scanner.nextLine();
             if (value.equals("0")) {
-                printPantryContents();
+                this.pantryItemList.forEach(System.out::println);
+                writeToFile(pantryFilePath, gson.toJson(this.pantryItemList));
             } else {
-                return;
+                writeToFile(pantryFilePath, gson.toJson(this.pantryItemList));
             }
         } else {
-            newPantryItems.add(value);
+            this.pantryItemList.add(value);
             addToPantry();
         }
     }
