@@ -33,10 +33,12 @@ public class AppUtils extends App {
     private static final Gson gson = new Gson();
     String[] ingredientArray;
     String[] measurementArray;
-    HashSet<String> knownIngredients = new HashSet<>();
     List<ResponseObject.MealDBMeal> meals = new ArrayList<>();
     List<CustomJsonObject.Meal> listOfMeals = new ArrayList<>();
     List<CustomJsonObject.Meal> processedMeals = new ArrayList<>();
+    HashSet<String> knownIngredientsHashSet = new HashSet<>();
+    HashSet<CustomJsonObject.Meal> knownMealHashSet = new HashSet<>();
+    List<String> pantryItemList = new ArrayList<>();
     List<String> rawIngredients = new ArrayList<>();
     List<String> ingredients = new ArrayList<>();
     List<String> fileContents = new ArrayList<>();
@@ -44,7 +46,14 @@ public class AppUtils extends App {
     List<String> measurements = new ArrayList<>();
     String pantryFilePath = "src/main/resources/archive/pantry/stock.json";
     String mealsFilePath = "src/main/resources/archive/meals/meals.json";
-    String mealJsonUri = "src/main/resources/archive/meals/";
+    String knownIngredientsFilePath = "src/main/resources/archive/meals/info/listOfKnownIngredients.json";
+    File knownIngredientFile = new File(knownIngredientsFilePath);
+    File pantryFile = new File(pantryFilePath);
+    File mealsFile = new File(mealsFilePath);
+    Scanner scanner = new Scanner(System.in);
+    String value;
+    CustomJsonObject.Ingredient pantry =
+        gson.fromJson(getFileContent(pantryFile), CustomJsonObject.Ingredient.class);
 
     public HttpClient HTTP_CLIENT = HttpClient.newBuilder()
         .version(HttpClient.Version.HTTP_2)
@@ -83,9 +92,10 @@ public class AppUtils extends App {
             System.out.printf("There are %s meals available.\n", meals.size());
             meals.stream().forEach(meal -> processMeal(meal));
             System.out.println("There is a possible "
-                           + knownIngredients.size()
+                           + knownIngredientsHashSet.size()
                            + " unique ingredients to choose from.");
-            writeToFile(mealsFilePath, gson.toJson(this.listOfMeals), "meals");
+            writeToFile(mealsFilePath, gson.toJson(this.knownMealHashSet), "meals");
+            writeToFile(knownIngredientsFilePath, gson.toJson(this.knownIngredientsHashSet), "ingredients");
         } else {
             System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
@@ -110,15 +120,11 @@ public class AppUtils extends App {
         rawIngredients.stream().forEach(ing -> {
                 if (ing != null && ing.length() > 0) {
                     ingredients.add(ing);
-                    knownIngredients.add(ing);
+                    knownIngredientsHashSet.add(ing.toLowerCase());
                 }
             });
         ingredientArray = new String[ingredients.size()];
         for (int i = 0; i < ingredients.size() ; i++) ingredientArray[i] = ingredients.get(i);
-        String mealName = meal.strMeal;
-        String mealNameString = mealName.replace(" ", "_");
-        mealNameString = mealNameString.replace("&", "and");
-        mealNameString = mealNameString.replace("'", "");
         rawMeasurements.add(meal.strMeasure1);
         rawMeasurements.add(meal.strMeasure2);
         rawMeasurements.add(meal.strMeasure3);
@@ -141,17 +147,13 @@ public class AppUtils extends App {
             });
         measurementArray = new String[measurements.size()];
         for (int i = 0; i < measurements.size() ; i++) measurementArray[i] = measurements.get(i);
-        String mealDescription = meal.strDescription;
-        String mealInstructions = meal.strInstructions;
-        String mealCategory = meal.strCategory;
-        String mealArea = meal.strArea;
-        addToCollection(mealNameString,
+        addToCollection(meal.strMeal,
                         this.ingredientArray,
                         this.measurementArray,
-                        mealDescription,
-                        mealInstructions,
-                        mealCategory,
-                        mealArea);
+                        meal.strDescription,
+                        meal.strInstructions,
+                        meal.strCategory,
+                        meal.strArea);
         this.rawIngredients.clear();
         this.ingredients.clear();
         this.rawMeasurements.clear();
@@ -173,7 +175,7 @@ public class AppUtils extends App {
                                       mealInstructions,
                                       mealCategory,
                                       mealArea);
-        this.listOfMeals.add(customMeal);
+        this.knownMealHashSet.add(customMeal);
     }
 
     private void writeToFile(String path, String content, String type) {
@@ -189,27 +191,6 @@ public class AppUtils extends App {
         } catch (IOException e) {
             System.out.println("An error occured.");
             e.printStackTrace();
-        }
-    }
-
-    File directoryPath;
-    FilenameFilter jsonFilefilter;
-    File[] fileList;
-
-    private void findMealFiles() {
-        this.directoryPath = new File("src/main/resources/archive/meals");
-        this.jsonFilefilter = new FilenameFilter() {
-                public boolean accept(File dir, String name) {
-                    String lowercaseName = name.toLowerCase();
-                    if (lowercaseName.endsWith(".json")) {
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }};
-        this.fileList = directoryPath.listFiles(jsonFilefilter);
-        for(File file : fileList) {
-            processedMeals.add(gson.fromJson(getFileContent(file), CustomJsonObject.Meal.class));
         }
     }
 
@@ -239,21 +220,23 @@ public class AppUtils extends App {
      * of inquiries formatted and shown in the CLI
      **/
     public void userInterface() {
-        // Create a Scanner object
-        Scanner scanner = new Scanner(System.in);
-        String json;
         System.out.println("Welcome! How can I help you?");
         System.out.println("[0] options"
                            + "\n[1] search"
                            + "\n[2] pantry"
-                           + "\n[3] list known meals");
-        String value = scanner.nextLine();
+                           + "\n[3] list known meals"
+                           + "\n[4] list known ingredients");
+
+        this.value = scanner.nextLine();
         if (value.toLowerCase().equals("1")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
             System.out.printf("Searching for %s\n", mealString);
+            fillKnownIngredientList();
+            fillKnownMealsSet();
             searchMealDB(mealString, "search")
                 .ifPresent(result -> processMealDBResult(result));
+            userInterface();
         }
         else if (value.toLowerCase().equals("0")) {
             System.out.println("You chose options.\n this path is not coded yet");
@@ -266,16 +249,24 @@ public class AppUtils extends App {
                                + "\n[ 2 ] see what you can make "
                                + "\n[ 3 ] return");
             handlePantry();
+            userInterface();
         } else if (value.toLowerCase().equals("3")) {
             System.out.println("You chose to list known meals. ");
+            fillKnownMealsSet();
             printKnownMeals();
+            userInterface();
+        } else if (value.toLowerCase().equals("4")) {
+            System.out.println("You chose to list known ingredients. ");
+            fillKnownIngredientList();
+            printKnownIngredients();
+            userInterface();
+        } else {
+            return;
         }
     }
 
     public void handlePantry() {
-        Scanner scanner = new Scanner(System.in);
-        String json;
-        String value = scanner.nextLine();
+        this.value = scanner.nextLine();
         if (value.equals("0")) {
             System.out.println("Choice: Update Pantry");
             updatePantry();
@@ -290,14 +281,12 @@ public class AppUtils extends App {
     }
 
     public void updatePantry() {
-        Scanner scanner = new Scanner(System.in);
-        String json;
         System.out.println("Would you like to [ ] ?"
-                           + "\n[ 0 ] remove an item"
+                           + "\n[ 0 ] remove (an) item(s)"
                            + "\n[ 1 ] add (an) item(s)"
                            + "\n[ 2 ] audit pantry"
                            + "\n[ 3 ] go back an option set");
-        String value = scanner.nextLine();
+        this.value = scanner.nextLine();
         if (value.equals("0")) {
             System.out.println("You chose to remove an item. \n Which one would that be?");
             System.out.println("jk havent coded this part yet! ");
@@ -310,12 +299,6 @@ public class AppUtils extends App {
             System.out.println("You chose to audit the pantry. Contact administrator. ");
         }
     }
-
-    File pantryFile = new File(pantryFilePath);
-    List<String> pantryItemList = new ArrayList<>();
-
-    CustomJsonObject.Ingredient pantry =
-        gson.fromJson(getFileContent(pantryFile), CustomJsonObject.Ingredient.class);
 
     public CustomJsonObject.Ingredient findPantryFile() {
         File currentPantryFile = new File(pantryFilePath);
@@ -334,8 +317,6 @@ public class AppUtils extends App {
         Arrays.asList(pantry.getIngredients()).forEach(System.out::println);
     }
 
-    Scanner scanner = new Scanner(System.in);
-    String value;
 
     public void addToPantry() {
         this.value = this.scanner.nextLine();
@@ -345,8 +326,8 @@ public class AppUtils extends App {
                                + "\n[ 1 ] no");
             this.value = scanner.nextLine();
             if (this.value.equals("0")) {
-                writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
                 this.pantryItemList.forEach(System.out::println);
+                writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
             } else {
                 writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
             }
@@ -361,11 +342,28 @@ public class AppUtils extends App {
         CustomJsonObject.MealItems meals =
             gson.fromJson(getFileContent(file), CustomJsonObject.MealItems.class);
         for (CustomJsonObject.Meal meal : meals.meals) {
-            System.out.println(meal.getMealName()
-                               + "\n "
-                               + Arrays.asList(meal.getMealIngredients()));
+            System.out.println("Meal: "
+                               + "\n    "
+                               + meal.getMealName() + "\n");
         }
     }
+
+    public void fillKnownMealsSet() {
+        CustomJsonObject.MealItems meals =
+            gson.fromJson(getFileContent(mealsFile), CustomJsonObject.MealItems.class);
+        Arrays.asList(meals.meals).forEach(meal -> this.knownMealHashSet.add(meal));
+    }
+
+    public void fillKnownIngredientList() {
+        CustomJsonObject.Ingredient knownIngs =
+            gson.fromJson(getFileContent(knownIngredientFile), CustomJsonObject.Ingredient.class);
+        Arrays.asList(knownIngs.getIngredients()).forEach(ing -> knownIngredientsHashSet.add(ing));
+    }
+
+    public void printKnownIngredients() {
+        knownIngredientsHashSet.forEach(System.out::println);
+    }
+
 
 
     public AppUtils() {
