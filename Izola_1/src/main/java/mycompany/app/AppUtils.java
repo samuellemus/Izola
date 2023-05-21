@@ -52,6 +52,7 @@ public class AppUtils extends App {
     File mealsFile = new File(mealsFilePath);
     Scanner scanner = new Scanner(System.in);
     String value;
+
     CustomJsonObject.Ingredient pantry =
         gson.fromJson(getFileContent(pantryFile), CustomJsonObject.Ingredient.class);
 
@@ -265,6 +266,9 @@ public class AppUtils extends App {
         }
     }
 
+    /**
+     *  {@code handlePantry()} Takes in no input and returns nothing.
+     *  */
     public void handlePantry() {
         this.value = scanner.nextLine();
         if (value.equals("0")) {
@@ -291,7 +295,7 @@ public class AppUtils extends App {
             System.out.println("You chose to remove an item. \n Which one would that be?");
             System.out.println("jk havent coded this part yet! ");
         } else if (value.equals("1")) {
-            System.out.println("Your chose to add (an) item(s). \n Type your item(s)"
+            System.out.println("You chose to add (an) item(s). \n Type your item(s)"
                                + " (*type \"exit\" when finished adding items*)");
             fillCurrentPantryList();
             addToPantry();
@@ -318,6 +322,7 @@ public class AppUtils extends App {
     }
 
 
+
     public void addToPantry() {
         this.value = this.scanner.nextLine();
         if (this.value.equals("exit")) {
@@ -337,22 +342,35 @@ public class AppUtils extends App {
         }
     }
 
+    /**
+     * {@code printKnownMeals} takes no input and returns nothing.
+     * Creates an {@code CustomJsonObject.MealItems object} and populates it with a
+     * gson-processed collection of objects.
+     * Then, the {@code meal.getName()} method is called on each meal object to print
+     * out a list of all of the meal names in a local json file.
+     *  */
     public void printKnownMeals() {
-        File file = new File(mealsFilePath);
         CustomJsonObject.MealItems meals =
-            gson.fromJson(getFileContent(file), CustomJsonObject.MealItems.class);
-        for (CustomJsonObject.Meal meal : meals.meals) {
-            System.out.println("Meal: "
-                               + "\n    "
-                               + meal.getMealName() + "\n");
-        }
+            gson.fromJson(getFileContent(mealsFile), CustomJsonObject.MealItems.class);
+        Arrays.asList(meals.meals).forEach(meal -> {
+                System.out.println("Meal: "
+                                   + "\n    "
+                                   + meal.getMealName() + "\n");
+            };
     }
 
+    /**
+     * {@code fillKnownMealsSet} takes no input and returns nothing.
+     * Creates an {@code CustomJsonObject.MealItems object} and populates it with a
+     * gson-processed collection of objects.
+     * Then, the MealItems objects are sent to a {@code knownMealHashSet} Hash Set.
+     *  */
     public void fillKnownMealsSet() {
         CustomJsonObject.MealItems meals =
             gson.fromJson(getFileContent(mealsFile), CustomJsonObject.MealItems.class);
         Arrays.asList(meals.meals).forEach(meal -> this.knownMealHashSet.add(meal));
     }
+
 
     public void fillKnownIngredientList() {
         CustomJsonObject.Ingredient knownIngs =
@@ -365,6 +383,26 @@ public class AppUtils extends App {
     }
 
 
+    public void compareIngredient(String ingredient) {
+        if (!ingredient.isIn(knownIngredientsList)) {
+            System.out.println("Hm. I don't know that one. Would you [ ]?"
+                               + "[ 0 ] like a suggestion including the ingredients I know"
+                               + "[ 1 ] omit this prompt"
+                               + "[ 2 ] add anyway"
+                               + "*Note: If I'm not able to recognize which meal you are providing,"
+                               + "\n    I will not be able to provide suggestions for you"
+                               + "\n    regarding that ingredient.");
+            this.value = scanner.nextLine();
+            if (value.equals("0")) {
+                generateSuggestion();
+            }
+        }
+    }
+
+
+    public void generateSuggestion(String item) {
+        System.out.println("Hello world");
+    }
 
     public AppUtils() {
         super();
