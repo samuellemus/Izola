@@ -522,7 +522,7 @@ public class AppUtils extends App {
         System.out.println("Provide the index number of the meal you're interested in.");
         System.out.println("Type \"exit\" to go back");
         this.value = scanner.nextLine();
-        if (!value.toLowerCase().equals("exit")) {
+        if (!value.equalsIgnoreCase("exit")) {
             if (Integer.parseInt(value) > 0 && Integer.parseInt(value) < this.knownMealList.size()) {
                 System.out.println(" -- Meal -- "
                         + "\n   " + this.knownMealList.get(Integer.parseInt(value)).getMealName()
