@@ -222,14 +222,8 @@ public class AppUtils extends App {
                 System.out.println("You chose to list known meals. ");
                 handleMealDisplay();
             }
-            case "3" -> {
-                System.out.println("You chose to list known ingredients. ");
-                fillKnownIngredientSet();
-                knownIngredientsSet.forEach(System.out::println);
-                userInterface();
-            }
             default -> {
-                return;
+                System.out.println("Exiting...\nGoodbye!");
             }
         }
     }
@@ -311,25 +305,29 @@ public class AppUtils extends App {
         Arrays.asList(pantry.getIngredients()).forEach(System.out::println);
     }
 
+    String pantryBoundItem;
     public void addToPantry() {
-        this.value = this.scanner.nextLine();
-        if (this.value.equals("exit")) {
+        this.pantryBoundItem = this.scanner.nextLine();
+        String secondUserValue;
+        Boolean toAdd = checkIngredient(this.value);
+        if (this.pantryBoundItem.equals("exit")) {
             System.out.println("""
                     Would you like to see your inventory?
                     [ 0 ] yes
                     [ 1 ] no""");
-            this.value = scanner.nextLine();
-            if (this.value.equals("0")) {
+            secondUserValue = scanner.nextLine();
+            if (secondUserValue.equals("0")) {
                 this.pantryItemList.forEach(System.out::println);
                 writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
             } else {
                 writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
             }
-        } else if (checkIngredient(value)) {
-            this.pantryItemList.add(value);
-            addToPantry();
-        } else if (!checkIngredient(value)) {
-            addToPantry();
+        } else if (toAdd) {
+            this.pantryItemList.add(this.pantryBoundItem);
+            writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
+            handleUpdatePantry();
+        } else if (!toAdd) {
+            handleUpdatePantry();
         }
     }
 
@@ -398,7 +396,7 @@ public class AppUtils extends App {
                     return false;
                 }
                 case "2" -> {
-                    System.out.println("Added.");
+                    System.out.println("Added : " + this.pantryBoundItem);
                     return true;
                 }
                 case "3" -> {
