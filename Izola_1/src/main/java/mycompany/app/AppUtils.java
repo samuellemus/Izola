@@ -36,8 +36,9 @@ public class AppUtils extends App {
     List<ResponseObject.MealDBMeal> meals = new ArrayList<>();
     List<CustomJsonObject.Meal> listOfMeals = new ArrayList<>();
     List<CustomJsonObject.Meal> processedMeals = new ArrayList<>();
-    HashSet<String> knownIngredientsHashSet = new HashSet<>();
-    HashSet<CustomJsonObject.Meal> knownMealHashSet = new HashSet<>();
+    HashSet<String> knownIngredientsSet = new HashSet<>();
+    HashSet<CustomJsonObject.Meal> knownMealSet = new HashSet<>();
+    HashSet<CustomJsonObject.Meal> possibleMealsSet = new HashSet<>();
     List<String> pantryItemList = new ArrayList<>();
     List<String> rawIngredients = new ArrayList<>();
     List<String> ingredients = new ArrayList<>();
@@ -93,10 +94,10 @@ public class AppUtils extends App {
             System.out.printf("There are %s meals available.\n", meals.size());
             meals.stream().forEach(meal -> processMeal(meal));
             System.out.println("There is a possible "
-                           + knownIngredientsHashSet.size()
+                           + knownIngredientsSet.size()
                            + " unique ingredients to choose from.");
-            writeToFile(mealsFilePath, gson.toJson(this.knownMealHashSet), "meals");
-            writeToFile(knownIngredientsFilePath, gson.toJson(this.knownIngredientsHashSet), "ingredients");
+            writeToFile(mealsFilePath, gson.toJson(this.knownMealSet), "meals");
+            writeToFile(knownIngredientsFilePath, gson.toJson(this.knownIngredientsSet), "ingredients");
         } else {
             System.out.println("Hm. I don't have anything for that. \n -> Perhaps try again?");
         }
@@ -121,7 +122,7 @@ public class AppUtils extends App {
         rawIngredients.stream().forEach(ing -> {
                 if (ing != null && ing.length() > 0) {
                     ingredients.add(ing);
-                    knownIngredientsHashSet.add(ing.toLowerCase());
+                    knownIngredientsSet.add(ing.toLowerCase());
                 }
             });
         ingredientArray = new String[ingredients.size()];
@@ -148,35 +149,19 @@ public class AppUtils extends App {
             });
         measurementArray = new String[measurements.size()];
         for (int i = 0; i < measurements.size() ; i++) measurementArray[i] = measurements.get(i);
-        addToCollection(meal.strMeal,
-                        this.ingredientArray,
-                        this.measurementArray,
-                        meal.strDescription,
-                        meal.strInstructions,
-                        meal.strCategory,
-                        meal.strArea);
+        CustomJsonObject.Meal customMeal =
+            new CustomJsonObject.Meal(meal.strMeal,
+                                      this.ingredientArray,
+                                      this.measurementArray,
+                                      meal.strDescription,
+                                      meal.strInstructions,
+                                      meal.strCategory,
+                                      meal.strArea);
+        this.knownMealSet.add(customMeal);
         this.rawIngredients.clear();
         this.ingredients.clear();
         this.rawMeasurements.clear();
         this.measurements.clear();
-    }
-
-    private void addToCollection(String mealName,
-                                 String[] ingredients,
-                                 String[] measurements,
-                                 String mealDescription,
-                                 String mealInstructions,
-                                 String mealCategory,
-                                 String mealArea) {
-        CustomJsonObject.Meal customMeal =
-            new CustomJsonObject.Meal(mealName,
-                                      ingredients,
-                                      measurements,
-                                      mealDescription,
-                                      mealInstructions,
-                                      mealCategory,
-                                      mealArea);
-        this.knownMealHashSet.add(customMeal);
     }
 
     private void writeToFile(String path, String content, String type) {
@@ -217,7 +202,7 @@ public class AppUtils extends App {
     }
 
     /**
-     * userInterface permits the user to interact with the program to allow to custom modification
+     * userInterface permits the user to interact with the program to allow the custom modification
      * of inquiries formatted and shown in the CLI
      **/
     public void userInterface() {
@@ -227,13 +212,12 @@ public class AppUtils extends App {
                            + "\n[2] pantry"
                            + "\n[3] list known meals"
                            + "\n[4] list known ingredients");
-
         this.value = scanner.nextLine();
         if (value.toLowerCase().equals("1")) {
             System.out.println("You chose search.\n Which meal are you looking for?");
             String mealString = scanner.nextLine();
             System.out.printf("Searching for %s\n", mealString);
-            fillKnownIngredientList();
+            fillKnownIngredientSet();
             fillKnownMealsSet();
             searchMealDB(mealString, "search")
                 .ifPresent(result -> processMealDBResult(result));
@@ -243,23 +227,17 @@ public class AppUtils extends App {
             System.out.println("You chose options.\n this path is not coded yet");
         }
         else if (value.toLowerCase().equals("2")) {
-            System.out.println("Welcome to your pantry!");
-            System.out.println("Would you like to [ ] ?"
-                               + "\n[ 0 ] update pantry "
-                               + "\n[ 1 ] show pantry contents "
-                               + "\n[ 2 ] see what you can make "
-                               + "\n[ 3 ] return");
             handlePantry();
             userInterface();
         } else if (value.toLowerCase().equals("3")) {
             System.out.println("You chose to list known meals. ");
             fillKnownMealsSet();
             printKnownMeals();
-            userInterface();
+            handleMealDisplay();
         } else if (value.toLowerCase().equals("4")) {
             System.out.println("You chose to list known ingredients. ");
-            fillKnownIngredientList();
-            printKnownIngredients();
+            fillKnownIngredientSet();
+            knownIngredientsSet.forEach(System.out::println);
             userInterface();
         } else {
             return;
@@ -268,8 +246,16 @@ public class AppUtils extends App {
 
     /**
      *  {@code handlePantry()} Takes in no input and returns nothing.
+     *  Takes the next input from the user using a scanner object.
+     *  Then, handles the response from the user; guided by text prompt.
      *  */
     public void handlePantry() {
+        System.out.println("Welcome to your pantry.");
+            System.out.println("Would you like to [ ] ?"
+                               + "\n[ 0 ] update pantry "
+                               + "\n[ 1 ] show pantry contents "
+                               + "\n[ 2 ] see what you can make "
+                               + "\n[ 3 ] return");
         this.value = scanner.nextLine();
         if (value.equals("0")) {
             System.out.println("Choice: Update Pantry");
@@ -279,6 +265,7 @@ public class AppUtils extends App {
             printPantryContents();
         } else if (value.equals("2")) {
             System.out.println("Choice: see what you can make");
+            possibleMeals();
         } else {
             System.out.println("Choice: return");
         }
@@ -336,11 +323,14 @@ public class AppUtils extends App {
             } else {
                 writeToFile(pantryFilePath, gson.toJson(this.pantryItemList), "ingredients");
             }
-        } else {
+        } else if (checkIngredient(value)){
             this.pantryItemList.add(value);
+            addToPantry();
+        } else if (!checkIngredient(value)) {
             addToPantry();
         }
     }
+
 
     /**
      * {@code printKnownMeals} takes no input and returns nothing.
@@ -356,7 +346,7 @@ public class AppUtils extends App {
                 System.out.println("Meal: "
                                    + "\n    "
                                    + meal.getMealName() + "\n");
-            };
+            });
     }
 
     /**
@@ -368,40 +358,102 @@ public class AppUtils extends App {
     public void fillKnownMealsSet() {
         CustomJsonObject.MealItems meals =
             gson.fromJson(getFileContent(mealsFile), CustomJsonObject.MealItems.class);
-        Arrays.asList(meals.meals).forEach(meal -> this.knownMealHashSet.add(meal));
+        Arrays.asList(meals.meals).forEach(meal -> this.knownMealSet.add(meal));
     }
 
 
-    public void fillKnownIngredientList() {
+    public void fillKnownIngredientSet() {
         CustomJsonObject.Ingredient knownIngs =
             gson.fromJson(getFileContent(knownIngredientFile), CustomJsonObject.Ingredient.class);
-        Arrays.asList(knownIngs.getIngredients()).forEach(ing -> knownIngredientsHashSet.add(ing));
-    }
-
-    public void printKnownIngredients() {
-        knownIngredientsHashSet.forEach(System.out::println);
+        Arrays.asList(knownIngs.getIngredients()).forEach(ing -> knownIngredientsSet.add(ing));
     }
 
 
-    public void compareIngredient(String ingredient) {
-        if (!ingredient.isIn(knownIngredientsList)) {
-            System.out.println("Hm. I don't know that one. Would you [ ]?"
-                               + "[ 0 ] like a suggestion including the ingredients I know"
-                               + "[ 1 ] omit this prompt"
-                               + "[ 2 ] add anyway"
-                               + "*Note: If I'm not able to recognize which meal you are providing,"
-                               + "\n    I will not be able to provide suggestions for you"
-                               + "\n    regarding that ingredient.");
+    public boolean checkIngredient(String ingredient) {
+        if (!this.knownIngredientsSet.contains(ingredient)) {
+            System.out.println("Hm. I don't know that one. \nWould you [ ]?"
+                               + "\n[ 0 ] like a suggestion based on the ingredients I know"
+                               + "\n[ 1 ] omit this prompt"
+                               + "\n[ 2 ] add anyway"
+                               + "\n[ 3 ] try again"
+                               + "\n*Note: If I'm not able to recognize which meal you are providing,"
+                               + "\n    there is a possibility that I will not be able to provide"
+                               + "\n    suggestions for you regarding that ingredient.");
             this.value = scanner.nextLine();
+            System.out.println("*Note: If I don't know of a certain ingredient, "
+                               + "try searching for a meal with that ingredient. ");
             if (value.equals("0")) {
-                generateSuggestion();
+                this.fillKnownIngredientSet();
+                System.out.println("Known ingredient set size: " + this.knownIngredientsSet.size());
+                this.knownIngredientsSet.forEach(elem -> {
+                        if(elem.contains(ingredient.substring(0,2))) {
+                            System.out.println(elem);
+                        }
+                    });
+                return false;
+            } else if (value.equals("1")) {
+                System.out.println("Omitted.");
+                return false;
+            } else if (value.equals("2")) {
+                System.out.println("Added.");
+                return true;
+            } else if (value.equals("3")) {
+                this.value = scanner.nextLine();
+                checkIngredient(value);
             }
         }
+        return true;
     }
 
+    public void possibleMeals() {
+        fillKnownMealsSet();
+        fillKnownIngredientSet();
+        knownMealSet.forEach(meal -> {
+                knownIngredientsSet.forEach(ing -> {
+                        if (Arrays.asList(meal.getMealIngredients()).contains(ing)) {
+                            possibleMealsSet.add(meal);
+                        }
+                    });
+            });
+        this.possibleMealsSet.forEach(meal -> {
+                System.out.println(meal.getMealName()
+                                   + "\n" + numberOfSimilarIngredients(meal.getMealIngredients())
+                                   + " matching ingredients."
+                                   + "\n");
+            });
+    }
 
-    public void generateSuggestion(String item) {
-        System.out.println("Hello world");
+    HashSet<String> matchingIngredients = new HashSet<>();
+
+    public int numberOfSimilarIngredients(String[] mealIngredients) {
+        this.fillCurrentPantryList();
+        Arrays.asList(mealIngredients).forEach(mealIngredient -> {
+                pantryItemList.forEach(item -> {
+                        if (mealIngredient.contains(item)) {
+                            this.matchingIngredients.add(mealIngredient);
+                        }
+                    });
+            });
+        int matched = this.matchingIngredients.size();
+        System.out.println("You need " + (mealIngredients.length - matched) + " more ingredients to make this meal");
+        this.matchingIngredients.clear();
+        return matched;
+    }
+
+    public void handleMealDisplay() {
+        System.out.println("\n[ 0 ] more"
+                           + "\n[ 1 ] go back");
+        this.value = scanner.nextLine();
+        if (value.equals("0")) {
+            knownMealSet.forEach(meal -> {
+                    System.out.println("  -- Meal -- \n    "
+                                       + meal.getMealName()
+                                       + "\n  -- Instructions --      ");
+                    System.out.println(meal.getMealInstructions()+"\n");
+                });
+        } else if (value.equals("1")) {
+            userInterface();
+        }
     }
 
     public AppUtils() {
